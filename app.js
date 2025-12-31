@@ -1,4 +1,4 @@
-/* Versio 1.6.1 */
+/* Versio 1.7.0 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -90,7 +90,7 @@ function draw() {
     if (!analyser) return;
     requestAnimationFrame(draw);
     
-    const isLight = document.body.getAttribute('data-theme') === 'light';
+    const theme = document.body.getAttribute('data-theme');
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
     const mode = visualMode.value;
     const amp = sensitivity.value / 5;
@@ -113,21 +113,29 @@ function draw() {
         tempCanvas.height = canvas.height;
         tempCtx.drawImage(canvas, 0, 0);
         ctx.drawImage(tempCanvas, 0, -1);
+        
         let barWidth = canvas.width / (bufferLength / 2);
         for (let i = 0; i < bufferLength / 2; i++) {
             let val = freqData[i] * amp;
-            if (val < 50) { ctx.fillStyle = bgColor; }
-            else {
-                let lightness = isLight ? "40%" : "60%"; // Tummempia värejä valkoisella pohjalla
-                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
-                if (colorSelect.value !== 'rainbow') { ctx.globalAlpha = val/255; }
-                ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
-                ctx.globalAlpha = 1.0;
+            
+            // TIUKKA NOISE GATE (Raja-arvo 70)
+            if (val < 70) {
+                ctx.fillStyle = bgColor;
+            } else {
+                // VÄRIN VOIMAKKUUS (Vähennetään vaaleutta, lisätään kylläisyyttä)
+                let lightness = (theme === 'light') ? "35%" : "50%";
+                if (colorSelect.value === 'rainbow') {
+                    ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})`;
+                } else {
+                    ctx.fillStyle = accentColor;
+                }
             }
+            ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
         }
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4; // Vielä vähän paksumpi viiva
+        ctx.lineCap = 'round';
         ctx.strokeStyle = accentColor;
         ctx.fillStyle = accentColor;
 
@@ -136,7 +144,7 @@ function draw() {
             let x = 0;
             for (let i = 0; i < bufferLength; i++) {
                 if (colorSelect.value === 'rainbow') {
-                    let lightness = isLight ? "40%" : "50%";
+                    let lightness = (theme === 'light') ? "40%" : "50%";
                     ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${lightness})`;
                 }
                 let v = timeData[i] / 128.0;
@@ -151,11 +159,12 @@ function draw() {
             for (let i = 0; i < bufferLength / 2; i++) {
                 let barHeight = freqData[i] * amp;
                 if (colorSelect.value === 'rainbow') {
-                    let lightness = isLight ? "45%" : "50%"; // Lisätään kontrastia
+                    let lightness = (theme === 'light') ? "40%" : "50%";
                     ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})`;
                 } else {
                     ctx.fillStyle = accentColor;
                 }
+                // Piirretään palkit ilman varjoja tai läpinäkyvyyttä
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
             }
         } else if (mode === 'circular') {
@@ -165,7 +174,7 @@ function draw() {
             ctx.beginPath();
             for (let i = 0; i < bufferLength; i++) {
                 if (colorSelect.value === 'rainbow') {
-                    let lightness = isLight ? "40%" : "50%";
+                    let lightness = (theme === 'light') ? "40%" : "50%";
                     ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${lightness})`;
                 }
                 let v = timeData[i] / 128.0;
