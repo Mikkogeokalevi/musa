@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.3.0</title>
-    <link rel="stylesheet" href="style.css?v=1.3.0">
+    <title>Audio Scope Pro - v1.4.0</title>
+    <link rel="stylesheet" href="style.css?v=1.4.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -49,6 +49,7 @@
                 <label>Väri</label>
                 <select id="colorSelect">
                     <option value="#0f0">Vihreä</option>
+                    <option value="rainbow">Sateenkaari</option>
                     <option value="#ff0000">Punainen</option>
                     <option value="#ffcc00">Kulta</option>
                     <option value="#00d4ff">Syaani</option>
@@ -76,12 +77,21 @@
             <h1>Kehityshistoria</h1>
             
             <section class="history-item">
-                <div class="version-tag">v1.3.0 (Nykyinen)</div>
+                <div class="version-tag">v1.4.0 (Nykyinen)</div>
+                <ul>
+                    <li>Korjattu Vesiputous (Spectrogram): Lisätty Noise Gate -logiikka, joka estää näytön "puuroutumisen" taustakohinasta.</li>
+                    <li>Uusi väriominaisuus: "Sateenkaari" (Rainbow) tila, joka värittää taajuudet dynaamisesti HSL-asteikolla.</li>
+                    <li>Suorituskykyoptimointi: Käytetään edelleen suoraa Canvas-piirtoa valmiiden kirjastojen (kuten Chart.js) sijaan 60fps päivitysnopeuden takaamiseksi.</li>
+                    <li>Pienennetty FFT-alueen visualisointia kuultaville taajuuksille (0-11kHz), mikä tekee palkkinäkymästä dynaamisemman.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.3.0</div>
                 <ul>
                     <li>Lisätty reaaliaikainen taajuuden tunnistus (Hz).</li>
                     <li>Lisätty RMS-pohjainen äänenvoimakkuusmittari (dB).</li>
                     <li>Lisätty yläpalkki mittareiden numeerista seurantaa varten.</li>
-                    <li>Päivitetty FFT-koko tarkempaa analyysia varten.</li>
                 </ul>
             </section>
 
@@ -90,7 +100,6 @@
                 <ul>
                     <li>Lisätty Screen Wake Lock: Näyttö pysyy päällä.</li>
                     <li>Lisätty Spectrogram-näkymä.</li>
-                    <li>Skoopin klikkaus vaihtaa tilaa.</li>
                     <li>Asetukset siirretty omalle sivulleen.</li>
                 </ul>
             </section>
@@ -99,7 +108,6 @@
                 <div class="version-tag">v1.1.0</div>
                 <ul>
                     <li>LocalStorage-tuki asetusten muistamiseen.</li>
-                    <li>Laajennettu värivalikoimaa.</li>
                 </ul>
             </section>
 
@@ -112,6 +120,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.3.0"></script>
+    <script src="app.js?v=1.4.0"></script>
 </body>
 </html>
