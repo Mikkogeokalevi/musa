@@ -2,9 +2,9 @@
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Scope Pro - v1.0.0</title>
-    <link rel="stylesheet" href="style.css?v=1.0.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Audio Scope Pro - v1.1.0</title>
+    <link rel="stylesheet" href="style.css?v=1.1.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -32,6 +32,8 @@
                     <option value="#ff0000">Punainen</option>
                     <option value="#ffcc00">Kulta</option>
                     <option value="#00d4ff">Syaani</option>
+                    <option value="#ffffff">Valkoinen</option>
+                    <option value="#ff00ff">Pinkki</option>
                 </select>
             </div>
             <div class="control-group">
@@ -53,7 +55,17 @@
             <h1>Kehityshistoria</h1>
             
             <section class="history-item">
-                <div class="version-tag">v1.0.0 (Nykyinen)</div>
+                <div class="version-tag">v1.1.0 (Nykyinen)</div>
+                <ul>
+                    <li>Lisätty LocalStorage-tuki: Sovellus muistaa nyt valitun teeman, värin ja näkymän käynnistyksen välillä.</li>
+                    <li>Laajennettu värivalikoimaa (lisätty Valkoinen ja Pinkki).</li>
+                    <li>Parannettu asetusten latausjärjestystä koodissa välkkymisen estämiseksi.</li>
+                    <li>Päivitetty HTML-meta-tagit parempaa PWA-käytettävyyttä varten.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.0.0</div>
                 <ul>
                     <li>Projektin modulointi: Erotettu HTML, CSS ja JS omiin tiedostoihinsa.</li>
                     <li>Lisätty navigointijärjestelmä (Skooppi / Historia).</li>
@@ -83,6 +95,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.0.0"></script>
+    <script src="app.js?v=1.1.0"></script>
 </body>
 </html>
