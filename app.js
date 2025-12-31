@@ -1,4 +1,4 @@
-/* Versio 2.1.0 - KOKO KOODI */
+/* Versio 2.2.0 - UUDET VISUALISOINNIT: Star Burst & Mirror Wave */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -12,11 +12,9 @@ const hzDisplay = document.getElementById('hzDisplay');
 const dbDisplay = document.getElementById('dbDisplay');
 
 let isPaused = false;
-let peaks = new Float32Array(1024); // Peak Hold -muisti
+let peaks = new Float32Array(1024);
 
-// Pakotetaan nappi näkyviin heti latauksessa
 startBtn.style.setProperty('display', 'block', 'important');
-startBtn.style.setProperty('visibility', 'visible', 'important');
 
 window.showPage = function(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -43,13 +41,12 @@ function resize() {
 
 canvas.onclick = () => {
     if (!analyser) return;
-    const modes = ['wave', 'bars', 'spectrogram', 'circular'];
+    const modes = ['wave', 'mirror', 'bars', 'spectrogram', 'circular', 'star'];
     let nextIdx = (modes.indexOf(visualMode.value) + 1) % modes.length;
     visualMode.value = modes[nextIdx];
     localStorage.setItem('scope_mode', visualMode.value);
 };
 
-// Pitch detection logiikka
 function autoCorrelate(buf, sampleRate) {
     let SIZE = buf.length, rms = 0;
     for (let i=0; i<SIZE; i++) { let val = buf[i]/128 - 1; rms += val*val; }
@@ -100,7 +97,6 @@ function draw() {
     analyser.getByteTimeDomainData(timeData);
     analyser.getByteFrequencyData(freqData);
 
-    // Mittarit
     let freq = autoCorrelate(timeData, audioCtx.sampleRate);
     hzDisplay.innerText = freq === -1 ? "--- Hz" : Math.round(freq) + " Hz";
     let sum = 0;
@@ -109,76 +105,79 @@ function draw() {
     dbDisplay.innerText = dbValue + " dB";
     dbDisplay.style.color = (dbValue > 85) ? "#ff0000" : "var(--accent-color)";
 
-    if (mode === 'spectrogram') {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.strokeStyle = accentColor; ctx.fillStyle = accentColor;
+
+    if (mode === 'wave') {
+        ctx.beginPath(); let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme==='light'?'40%':'50%')})`;
+            let v = timeData[i] / 128.0, y = (canvas.height/2) + ((v-1)*(canvas.height/2)*amp);
+            if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            x += canvas.width / bufferLength;
+            if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
+        }
+        ctx.stroke();
+    } else if (mode === 'mirror') {
+        ctx.beginPath(); let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme==='light'?'40%':'50%')})`;
+            let v = (timeData[i] / 128.0) - 1;
+            let yOffset = v * (canvas.height/4) * amp;
+            ctx.moveTo(x, (canvas.height/2) - yOffset);
+            ctx.lineTo(x, (canvas.height/2) + yOffset);
+            x += canvas.width / bufferLength;
+            if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); }
+        }
+        ctx.stroke();
+    } else if (mode === 'bars') {
+        let visualBars = Math.min(bufferLength / 2, Math.floor(canvas.width / 5)); 
+        let barWidth = (canvas.width / visualBars);
+        let step = Math.floor((bufferLength / 2) / visualBars);
+        for (let i = 0; i < visualBars; i++) {
+            let valSum = 0; for(let j=0; j<step; j++) valSum += freqData[i * step + j];
+            let barHeight = (valSum / step) * amp;
+            ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/visualBars)*360}, 100%, ${(theme==='light'?'35%':'50%')})` : accentColor;
+            ctx.fillRect(Math.floor(i * barWidth), canvas.height - barHeight, Math.ceil(barWidth) - 1, barHeight);
+            if (barHeight > peaks[i]) peaks[i] = barHeight; else peaks[i] *= 0.98;
+            ctx.fillStyle = (theme === 'light') ? "#000" : "#fff";
+            ctx.fillRect(Math.floor(i * barWidth), canvas.height - peaks[i] - 2, Math.ceil(barWidth) - 1, 2);
+        }
+    } else if (mode === 'spectrogram') {
         tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
         tempCtx.drawImage(canvas, 0, 0); ctx.drawImage(tempCanvas, 0, -1);
         let barWidth = canvas.width / (bufferLength / 2);
         for (let i = 0; i < bufferLength / 2; i++) {
             let val = freqData[i] * amp;
-            if (val < 70) { ctx.fillStyle = bgColor; }
-            else {
-                let lightness = (theme === 'light') ? "35%" : "50%";
-                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
+            if (val > 70) {
+                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${(theme==='light'?'35%':'50%')})` : accentColor;
+                ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
             }
-            ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
         }
-    } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 4; ctx.lineCap = 'round';
-        ctx.strokeStyle = accentColor; ctx.fillStyle = accentColor;
-
-        if (mode === 'wave') {
-            ctx.beginPath(); let x = 0;
-            for (let i = 0; i < bufferLength; i++) {
-                if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme==='light'?'40%':'50%')})`;
-                let v = timeData[i] / 128.0, y = (canvas.height/2) + ((v-1)*(canvas.height/2)*amp);
-                if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                x += canvas.width / bufferLength;
-                if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
+    } else if (mode === 'circular') {
+        const cX = canvas.width / 2, cY = canvas.height / 2, r = Math.min(cX, cY) * 0.4;
+        ctx.beginPath();
+        for (let i = 0; i < bufferLength; i++) {
+            if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme==='light'?'40%':'50%')})`;
+            let v = timeData[i]/128, rad = r + ((v-1)*r*amp), ang = (i/bufferLength)*Math.PI*2;
+            let x = cX + Math.cos(ang)*rad, y = cY + Math.sin(ang)*rad;
+            if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
+        }
+        ctx.closePath(); ctx.stroke();
+    } else if (mode === 'star') {
+        const cX = canvas.width / 2, cY = canvas.height / 2;
+        for (let i = 0; i < bufferLength / 2; i++) {
+            let val = freqData[i] * amp * 0.5;
+            if (val > 10) {
+                ctx.strokeStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, ${(theme==='light'?'40%':'50%')})`;
+                let ang = (i / (bufferLength / 2)) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cX, cY);
+                ctx.lineTo(cX + Math.cos(ang) * val, cY + Math.sin(ang) * val);
+                ctx.stroke();
             }
-            ctx.stroke();
-        } else if (mode === 'bars') {
-            // OPTIMOITU PALKKI-PIIRTO PYSTYASENNON KIRKKAUTTA VARTEN
-            let barSpacing = 1;
-            let visualBars = Math.min(bufferLength / 2, Math.floor(canvas.width / 5)); 
-            let barWidth = (canvas.width / visualBars);
-            let step = Math.floor((bufferLength / 2) / visualBars);
-
-            for (let i = 0; i < visualBars; i++) {
-                let valSum = 0;
-                for(let j=0; j<step; j++) valSum += freqData[i * step + j];
-                let barHeight = (valSum / step) * amp;
-
-                let lightness = (theme === 'light') ? "35%" : "50%";
-                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/visualBars)*360}, 100%, ${lightness})` : accentColor;
-
-                ctx.fillRect(Math.floor(i * barWidth), canvas.height - barHeight, Math.ceil(barWidth) - barSpacing, barHeight);
-                
-                // Peak Hold
-                if (barHeight > peaks[i]) peaks[i] = barHeight;
-                else peaks[i] *= 0.98;
-                ctx.fillStyle = (theme === 'light') ? "#000" : "#fff";
-                ctx.fillRect(Math.floor(i * barWidth), canvas.height - peaks[i] - 2, Math.ceil(barWidth) - barSpacing, 2);
-            }
-            
-            ctx.fillStyle = (theme === 'light') ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
-            ctx.font = "bold 12px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("BASSO", canvas.width * 0.15, canvas.height - 10);
-            ctx.fillText("KESKIÄÄNET", canvas.width * 0.5, canvas.height - 10);
-            ctx.fillText("DISKANTTI", canvas.width * 0.85, canvas.height - 10);
-
-        } else if (mode === 'circular') {
-            const centerX = canvas.width / 2, centerY = canvas.height / 2, radius = Math.min(centerX, centerY) * 0.4;
-            ctx.beginPath();
-            for (let i = 0; i < bufferLength; i++) {
-                if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme==='light'?'40%':'50%')})`;
-                let v = timeData[i]/128, r = radius + ((v-1)*radius*amp), angle = (i/bufferLength)*Math.PI*2;
-                let x = centerX + Math.cos(angle)*r, y = centerY + Math.sin(angle)*r;
-                if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
-            }
-            ctx.closePath(); ctx.stroke();
         }
     }
 }
