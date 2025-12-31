@@ -2,168 +2,50 @@
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Scope Pro</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <style>
-        :root { --theme-color: #0f0; }
-        body { margin: 0; background: #000; color: var(--theme-color); font-family: 'Courier New', monospace; overflow: hidden; }
-        canvas { display: block; width: 100vw; height: 60vh; background: #050505; border-bottom: 1px solid #333; }
-        
-        .ui-panel { 
-            padding: 15px; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px;
-            background: #111;
-            height: 40vh;
-        }
-
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.8rem; text-transform: uppercase; opacity: 0.8; }
-        
-        button { 
-            background: var(--theme-color); color: #000; border: none; 
-            padding: 12px; font-weight: bold; border-radius: 5px; cursor: pointer;
-            grid-column: span 2;
-        }
-
-        select, input[type="range"] {
-            background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px;
-        }
-
-        .hidden { display: none; }
-    </style>
 </head>
 <body>
 
     <canvas id="scope"></canvas>
     
     <div class="ui-panel">
-        <button id="startBtn">KÄYNNISTÄ SKOOPPI</button>
-        
+        <button id="startBtn">KÄYNNISTÄ</button>
+
         <div class="control-group">
-            <label>Näkymä</label>
-            <select id="visualMode">
-                <option value="wave">Aaltomuoto (Oscilloscope)</option>
-                <option value="bars">Taajuuspalkit (FFT)</option>
+            <label>Tila</label>
+            <select id="themeSelect">
+                <option value="dark">Yö (Tumma)</option>
+                <option value="light">Päivä (Vaalea)</option>
             </select>
         </div>
 
         <div class="control-group">
             <label>Väri</label>
-            <select id="colorMode">
+            <select id="colorSelect">
                 <option value="#0f0">Vihreä</option>
-                <option value="#0af">Sininen</option>
-                <option value="#f0f">Purppura</option>
-                <option value="#f00">Punainen</option>
+                <option value="#ff0000">Punainen</option>
+                <option value="#ffcc00">Kulta</option>
+                <option value="#00d4ff">Syaani</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Näkymä</label>
+            <select id="visualMode">
+                <option value="wave">Aalto</option>
+                <option value="bars">Palkit</option>
             </select>
         </div>
 
         <div class="control-group">
             <label>Herkkyys</label>
-            <input type="range" id="sensitivity" min="1" max="10" value="5">
-        </div>
-
-        <div class="control-group">
-            <label>Viivan paksuus</label>
-            <input type="range" id="lineWidth" min="1" max="10" value="3">
+            <input type="range" id="sensitivity" min="1" max="15" value="5">
         </div>
     </div>
 
-    <script>
-        const canvas = document.getElementById('scope');
-        const ctx = canvas.getContext('2d');
-        const startBtn = document.getElementById('startBtn');
-        const visualMode = document.getElementById('visualMode');
-        const colorMode = document.getElementById('colorMode');
-        const sensitivity = document.getElementById('sensitivity');
-        const lineWidth = document.getElementById('lineWidth');
-
-        let audioCtx, analyser, dataArray, bufferLength;
-        let themeColor = '#0f0';
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight * 0.6;
-        }
-        window.onresize = resize;
-        resize();
-
-        colorMode.onchange = (e) => {
-            themeColor = e.target.value;
-            document.documentElement.style.setProperty('--theme-color', themeColor);
-        };
-
-        startBtn.onclick = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioCtx.createMediaStreamSource(stream);
-                analyser = audioCtx.createAnalyser();
-                
-                analyser.fftSize = 1024;
-                bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-                
-                source.connect(analyser);
-                startBtn.classList.add('hidden');
-                draw();
-            } catch (err) {
-                alert("Mikrofonia ei voitu aktivoida.");
-            }
-        };
-
-        function draw() {
-            requestAnimationFrame(draw);
-            ctx.fillStyle = '#050505';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.lineWidth = lineWidth.value;
-            ctx.strokeStyle = themeColor;
-            ctx.fillStyle = themeColor;
-
-            if (visualMode.value === 'wave') {
-                // AALTOMUOTO (OSCILLOSCOPE)
-                analyser.getByteTimeDomainData(dataArray);
-                ctx.beginPath();
-                let sliceWidth = canvas.width / bufferLength;
-                let x = 0;
-                let amp = sensitivity.value / 5;
-
-                for (let i = 0; i < bufferLength; i++) {
-                    let v = (dataArray[i] / 128.0);
-                    let y = (v * canvas.height / 2);
-                    
-                    // Sovelletaan herkkyyttä keskipisteen ympärillä
-                    let offset = y - (canvas.height / 2);
-                    y = (canvas.height / 2) + (offset * amp);
-
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                    x += sliceWidth;
-                }
-                ctx.stroke();
-
-            } else {
-                // TAAJUUSPALKIT (FFT)
-                analyser.getByteFrequencyData(dataArray);
-                let barWidth = (canvas.width / bufferLength) * 2.5;
-                let barHeight;
-                let x = 0;
-                let amp = sensitivity.value / 5;
-
-                for (let i = 0; i < bufferLength; i++) {
-                    barHeight = (dataArray[i] * amp);
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
-                    x += barWidth;
-                }
-            }
-        }
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
