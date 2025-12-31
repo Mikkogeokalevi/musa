@@ -1,9 +1,8 @@
-/* Versio 1.5.2 */
+/* Versio 1.6.0 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
 
-// Elementit
 const startBtn = document.getElementById('startBtn');
 const themeSelect = document.getElementById('themeSelect');
 const colorSelect = document.getElementById('colorSelect');
@@ -14,16 +13,10 @@ const dbDisplay = document.getElementById('dbDisplay');
 
 let wakeLock = null;
 
-// KORJAUS: showPage-funktio pitää olla globaalisti saatavilla
 window.showPage = function(pageId) {
-    // Piilotetaan kaikki sivut
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-    // Näytetään valittu sivu
     const activePage = document.getElementById(pageId);
-    if (activePage) {
-        activePage.classList.remove('hidden');
-    }
-    // Jos palataan skooppiin, varmistetaan canvaksen koko
+    if (activePage) activePage.classList.remove('hidden');
     if(pageId === 'scope-page') resize();
 };
 
@@ -31,11 +24,9 @@ function loadSettings() {
     const savedTheme = localStorage.getItem('scope_theme') || 'dark';
     const savedColor = localStorage.getItem('scope_color') || '#0f0';
     const savedMode = localStorage.getItem('scope_mode') || 'wave';
-
     themeSelect.value = savedTheme;
     colorSelect.value = savedColor;
     visualMode.value = savedMode;
-
     document.body.setAttribute('data-theme', savedTheme);
     document.documentElement.style.setProperty('--accent-color', savedColor);
 }
@@ -126,13 +117,18 @@ function draw() {
             let val = freqData[i] * amp;
             if (val < 50) { ctx.fillStyle = bgColor; }
             else {
-                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)` : `rgba(${parseInt(accentColor.slice(1,3), 16)}, ${parseInt(accentColor.slice(3,5), 16)}, ${parseInt(accentColor.slice(5,7), 16)}, ${val/255})`;
+                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)` : accentColor;
+                // Spectrogramissa käytetään edelleen läpinäkyvyyttä voimakkuuden mukaan
+                if (colorSelect.value !== 'rainbow') {
+                    ctx.globalAlpha = val/255;
+                }
+                ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
+                ctx.globalAlpha = 1.0;
             }
-            ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
         }
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3; // Paksumpi viiva paremman näkyvyyden saamiseksi
         ctx.strokeStyle = accentColor;
         ctx.fillStyle = accentColor;
 
@@ -140,17 +136,24 @@ function draw() {
             ctx.beginPath();
             let x = 0;
             for (let i = 0; i < bufferLength; i++) {
+                if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, 50%)`;
                 let v = timeData[i] / 128.0;
                 let y = (canvas.height/2) + ((v-1)*(canvas.height/2)*amp);
                 if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
                 x += canvas.width / bufferLength;
+                if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
             }
             ctx.stroke();
         } else if (mode === 'bars') {
             let barWidth = (canvas.width / (bufferLength / 2)) * 1.5;
             for (let i = 0; i < bufferLength / 2; i++) {
                 let barHeight = freqData[i] * amp;
-                if (colorSelect.value === 'rainbow') ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 80%, 50%)`;
+                if (colorSelect.value === 'rainbow') {
+                    ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)`;
+                } else {
+                    ctx.fillStyle = accentColor;
+                }
+                // Piirretään palkit ilman läpinäkyvyyttä (solid), jotta ne ovat kirkkaampia
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
             }
         } else if (mode === 'circular') {
@@ -159,12 +162,14 @@ function draw() {
             const radius = Math.min(centerX, centerY) * 0.4;
             ctx.beginPath();
             for (let i = 0; i < bufferLength; i++) {
+                if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, 50%)`;
                 let v = timeData[i] / 128.0;
                 let r = radius + ((v-1) * radius * amp);
                 let angle = (i / bufferLength) * Math.PI * 2;
                 let x = centerX + Math.cos(angle) * r;
                 let y = centerY + Math.sin(angle) * r;
                 if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
             }
             ctx.closePath();
             ctx.stroke();
