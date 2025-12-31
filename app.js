@@ -1,10 +1,9 @@
-/* Versio 1.9.0 */
+/* Versio 2.0.0 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('startBtn');
 
-// Elementit
 const themeSelect = document.getElementById('themeSelect');
 const colorSelect = document.getElementById('colorSelect');
 const visualMode = document.getElementById('visualMode');
@@ -13,8 +12,9 @@ const hzDisplay = document.getElementById('hzDisplay');
 const dbDisplay = document.getElementById('dbDisplay');
 
 let isPaused = false;
+let peaks = new Float32Array(1024); // Peak Hold -muisti
 
-// Pakotetaan nappi näkyviin heti
+// Pakotetaan nappi näkyviin
 startBtn.style.setProperty('display', 'block', 'important');
 
 window.showPage = function(pageId) {
@@ -41,7 +41,6 @@ function resize() {
 }
 
 canvas.onclick = () => {
-    if (isPaused) { isPaused = false; draw(); return; }
     if (!analyser) return;
     const modes = ['wave', 'bars', 'spectrogram', 'circular'];
     let nextIdx = (modes.indexOf(visualMode.value) + 1) % modes.length;
@@ -49,7 +48,6 @@ canvas.onclick = () => {
     localStorage.setItem('scope_mode', visualMode.value);
 };
 
-// Pitch detection logiikka
 function autoCorrelate(buf, sampleRate) {
     let SIZE = buf.length, rms = 0;
     for (let i=0; i<SIZE; i++) { let val = buf[i]/128 - 1; rms += val*val; }
@@ -86,7 +84,7 @@ const tempCanvas = document.createElement('canvas');
 const tempCtx = tempCanvas.getContext('2d');
 
 function draw() {
-    if (!analyser || isPaused) return;
+    if (!analyser) return;
     requestAnimationFrame(draw);
     
     const theme = document.body.getAttribute('data-theme');
@@ -100,13 +98,17 @@ function draw() {
     analyser.getByteTimeDomainData(timeData);
     analyser.getByteFrequencyData(freqData);
 
-    // Mittarit
+    // 1. Mittarit ja Dynaaminen väri
     let freq = autoCorrelate(timeData, audioCtx.sampleRate);
     hzDisplay.innerText = freq === -1 ? "--- Hz" : Math.round(freq) + " Hz";
+    
     let sum = 0;
     for(let i=0; i<timeData.length; i++) { let x = (timeData[i]/128.0)-1; sum += x*x; }
-    let db = 20 * Math.log10(Math.sqrt(sum/timeData.length) || 0.00001);
-    dbDisplay.innerText = Math.round(Math.max(0, db + 100)) + " dB";
+    let dbValue = Math.round(Math.max(0, (20 * Math.log10(Math.sqrt(sum/timeData.length) || 0.00001)) + 100));
+    dbDisplay.innerText = dbValue + " dB";
+    
+    // Varotusväri jos yli 85 dB
+    dbDisplay.style.color = (dbValue > 85) ? "#ff0000" : "var(--accent-color)";
 
     if (mode === 'spectrogram') {
         tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
@@ -143,7 +145,23 @@ function draw() {
                 let lightness = (theme === 'light') ? "40%" : "50%";
                 ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
+                
+                // Peak Hold logiikka
+                if (barHeight > peaks[i]) peaks[i] = barHeight;
+                else peaks[i] *= 0.98; // Peak laskee hitaasti
+                
+                ctx.fillStyle = (theme === 'light') ? "#000" : "#fff";
+                ctx.fillRect(i * barWidth, canvas.height - peaks[i] - 2, barWidth - 1, 2);
             }
+            
+            // Asteikkotekstit (Basso, Keski, Diskantti)
+            ctx.fillStyle = (theme === 'light') ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("BASSO", canvas.width * 0.1, canvas.height - 10);
+            ctx.fillText("KESKIÄÄNET", canvas.width * 0.5, canvas.height - 10);
+            ctx.fillText("DISKANTTI", canvas.width * 0.9, canvas.height - 10);
+
         } else if (mode === 'circular') {
             const centerX = canvas.width / 2, centerY = canvas.height / 2, radius = Math.min(centerX, centerY) * 0.4;
             ctx.beginPath();
