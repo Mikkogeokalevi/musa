@@ -1,4 +1,4 @@
-/* Versio 1.6.0 */
+/* Versio 1.6.1 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -90,6 +90,7 @@ function draw() {
     if (!analyser) return;
     requestAnimationFrame(draw);
     
+    const isLight = document.body.getAttribute('data-theme') === 'light';
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
     const mode = visualMode.value;
     const amp = sensitivity.value / 5;
@@ -117,18 +118,16 @@ function draw() {
             let val = freqData[i] * amp;
             if (val < 50) { ctx.fillStyle = bgColor; }
             else {
-                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)` : accentColor;
-                // Spectrogramissa käytetään edelleen läpinäkyvyyttä voimakkuuden mukaan
-                if (colorSelect.value !== 'rainbow') {
-                    ctx.globalAlpha = val/255;
-                }
+                let lightness = isLight ? "40%" : "60%"; // Tummempia värejä valkoisella pohjalla
+                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
+                if (colorSelect.value !== 'rainbow') { ctx.globalAlpha = val/255; }
                 ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
                 ctx.globalAlpha = 1.0;
             }
         }
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 3; // Paksumpi viiva paremman näkyvyyden saamiseksi
+        ctx.lineWidth = 3;
         ctx.strokeStyle = accentColor;
         ctx.fillStyle = accentColor;
 
@@ -136,7 +135,10 @@ function draw() {
             ctx.beginPath();
             let x = 0;
             for (let i = 0; i < bufferLength; i++) {
-                if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, 50%)`;
+                if (colorSelect.value === 'rainbow') {
+                    let lightness = isLight ? "40%" : "50%";
+                    ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${lightness})`;
+                }
                 let v = timeData[i] / 128.0;
                 let y = (canvas.height/2) + ((v-1)*(canvas.height/2)*amp);
                 if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
@@ -149,11 +151,11 @@ function draw() {
             for (let i = 0; i < bufferLength / 2; i++) {
                 let barHeight = freqData[i] * amp;
                 if (colorSelect.value === 'rainbow') {
-                    ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)`;
+                    let lightness = isLight ? "45%" : "50%"; // Lisätään kontrastia
+                    ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})`;
                 } else {
                     ctx.fillStyle = accentColor;
                 }
-                // Piirretään palkit ilman läpinäkyvyyttä (solid), jotta ne ovat kirkkaampia
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
             }
         } else if (mode === 'circular') {
@@ -162,7 +164,10 @@ function draw() {
             const radius = Math.min(centerX, centerY) * 0.4;
             ctx.beginPath();
             for (let i = 0; i < bufferLength; i++) {
-                if (colorSelect.value === 'rainbow') ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, 50%)`;
+                if (colorSelect.value === 'rainbow') {
+                    let lightness = isLight ? "40%" : "50%";
+                    ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${lightness})`;
+                }
                 let v = timeData[i] / 128.0;
                 let r = radius + ((v-1) * radius * amp);
                 let angle = (i / bufferLength) * Math.PI * 2;
