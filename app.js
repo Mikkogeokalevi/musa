@@ -1,4 +1,4 @@
-/* Versio 2.0.0 */
+/* Versio 2.1.0 - KOKO KOODI */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -14,8 +14,9 @@ const dbDisplay = document.getElementById('dbDisplay');
 let isPaused = false;
 let peaks = new Float32Array(1024); // Peak Hold -muisti
 
-// Pakotetaan nappi näkyviin
+// Pakotetaan nappi näkyviin heti latauksessa
 startBtn.style.setProperty('display', 'block', 'important');
+startBtn.style.setProperty('visibility', 'visible', 'important');
 
 window.showPage = function(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -48,6 +49,7 @@ canvas.onclick = () => {
     localStorage.setItem('scope_mode', visualMode.value);
 };
 
+// Pitch detection logiikka
 function autoCorrelate(buf, sampleRate) {
     let SIZE = buf.length, rms = 0;
     for (let i=0; i<SIZE; i++) { let val = buf[i]/128 - 1; rms += val*val; }
@@ -84,7 +86,7 @@ const tempCanvas = document.createElement('canvas');
 const tempCtx = tempCanvas.getContext('2d');
 
 function draw() {
-    if (!analyser) return;
+    if (!analyser || isPaused) return;
     requestAnimationFrame(draw);
     
     const theme = document.body.getAttribute('data-theme');
@@ -98,16 +100,13 @@ function draw() {
     analyser.getByteTimeDomainData(timeData);
     analyser.getByteFrequencyData(freqData);
 
-    // 1. Mittarit ja Dynaaminen väri
+    // Mittarit
     let freq = autoCorrelate(timeData, audioCtx.sampleRate);
     hzDisplay.innerText = freq === -1 ? "--- Hz" : Math.round(freq) + " Hz";
-    
     let sum = 0;
     for(let i=0; i<timeData.length; i++) { let x = (timeData[i]/128.0)-1; sum += x*x; }
     let dbValue = Math.round(Math.max(0, (20 * Math.log10(Math.sqrt(sum/timeData.length) || 0.00001)) + 100));
     dbDisplay.innerText = dbValue + " dB";
-    
-    // Varotusväri jos yli 85 dB
     dbDisplay.style.color = (dbValue > 85) ? "#ff0000" : "var(--accent-color)";
 
     if (mode === 'spectrogram') {
@@ -139,28 +138,35 @@ function draw() {
             }
             ctx.stroke();
         } else if (mode === 'bars') {
-            let barWidth = (canvas.width / (bufferLength / 2)) * 1.5;
-            for (let i = 0; i < bufferLength / 2; i++) {
-                let barHeight = freqData[i] * amp;
-                let lightness = (theme === 'light') ? "40%" : "50%";
-                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
-                ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
+            // OPTIMOITU PALKKI-PIIRTO PYSTYASENNON KIRKKAUTTA VARTEN
+            let barSpacing = 1;
+            let visualBars = Math.min(bufferLength / 2, Math.floor(canvas.width / 5)); 
+            let barWidth = (canvas.width / visualBars);
+            let step = Math.floor((bufferLength / 2) / visualBars);
+
+            for (let i = 0; i < visualBars; i++) {
+                let valSum = 0;
+                for(let j=0; j<step; j++) valSum += freqData[i * step + j];
+                let barHeight = (valSum / step) * amp;
+
+                let lightness = (theme === 'light') ? "35%" : "50%";
+                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/visualBars)*360}, 100%, ${lightness})` : accentColor;
+
+                ctx.fillRect(Math.floor(i * barWidth), canvas.height - barHeight, Math.ceil(barWidth) - barSpacing, barHeight);
                 
-                // Peak Hold logiikka
+                // Peak Hold
                 if (barHeight > peaks[i]) peaks[i] = barHeight;
-                else peaks[i] *= 0.98; // Peak laskee hitaasti
-                
+                else peaks[i] *= 0.98;
                 ctx.fillStyle = (theme === 'light') ? "#000" : "#fff";
-                ctx.fillRect(i * barWidth, canvas.height - peaks[i] - 2, barWidth - 1, 2);
+                ctx.fillRect(Math.floor(i * barWidth), canvas.height - peaks[i] - 2, Math.ceil(barWidth) - barSpacing, 2);
             }
             
-            // Asteikkotekstit (Basso, Keski, Diskantti)
             ctx.fillStyle = (theme === 'light') ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
             ctx.font = "bold 12px sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("BASSO", canvas.width * 0.1, canvas.height - 10);
+            ctx.fillText("BASSO", canvas.width * 0.15, canvas.height - 10);
             ctx.fillText("KESKIÄÄNET", canvas.width * 0.5, canvas.height - 10);
-            ctx.fillText("DISKANTTI", canvas.width * 0.9, canvas.height - 10);
+            ctx.fillText("DISKANTTI", canvas.width * 0.85, canvas.height - 10);
 
         } else if (mode === 'circular') {
             const centerX = canvas.width / 2, centerY = canvas.height / 2, radius = Math.min(centerX, centerY) * 0.4;
