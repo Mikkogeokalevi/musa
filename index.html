@@ -3,49 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Scope Pro</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Audio Scope Pro - v1.0.0</title>
+    <link rel="stylesheet" href="style.css?v=1.0.0">
     <link rel="manifest" href="manifest.json">
 </head>
-<body>
+<body data-theme="dark">
 
-    <canvas id="scope"></canvas>
-    
-    <div class="ui-panel">
-        <button id="startBtn">KÄYNNISTÄ</button>
+    <nav class="top-nav">
+        <button onclick="showPage('scope-page')">SKOOPPI</button>
+        <button onclick="showPage('history-page')">HISTORIA</button>
+    </nav>
 
-        <div class="control-group">
-            <label>Tila</label>
-            <select id="themeSelect">
-                <option value="dark">Yö (Tumma)</option>
-                <option value="light">Päivä (Vaalea)</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label>Väri</label>
-            <select id="colorSelect">
-                <option value="#0f0">Vihreä</option>
-                <option value="#ff0000">Punainen</option>
-                <option value="#ffcc00">Kulta</option>
-                <option value="#00d4ff">Syaani</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label>Näkymä</label>
-            <select id="visualMode">
-                <option value="wave">Aalto</option>
-                <option value="bars">Palkit</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label>Herkkyys</label>
-            <input type="range" id="sensitivity" min="1" max="15" value="5">
+    <div id="scope-page" class="page">
+        <canvas id="scope"></canvas>
+        <div class="ui-panel">
+            <button id="startBtn">KÄYNNISTÄ MIKROFONI</button>
+            <div class="control-group">
+                <label>Teema</label>
+                <select id="themeSelect">
+                    <option value="dark">Yö (Tumma)</option>
+                    <option value="light">Päivä (Vaalea)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Väri</label>
+                <select id="colorSelect">
+                    <option value="#0f0">Vihreä</option>
+                    <option value="#ff0000">Punainen</option>
+                    <option value="#ffcc00">Kulta</option>
+                    <option value="#00d4ff">Syaani</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Näkymä</label>
+                <select id="visualMode">
+                    <option value="wave">Aalto</option>
+                    <option value="bars">Palkit</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Herkkyys</label>
+                <input type="range" id="sensitivity" min="1" max="15" value="5">
+            </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <div id="history-page" class="page hidden">
+        <div class="history-container">
+            <h1>Kehityshistoria</h1>
+            
+            <section class="history-item">
+                <div class="version-tag">v1.0.0 (Nykyinen)</div>
+                <ul>
+                    <li>Projektin modulointi: Erotettu HTML, CSS ja JS omiin tiedostoihinsa.</li>
+                    <li>Lisätty navigointijärjestelmä (Skooppi / Historia).</li>
+                    <li>Lisätty teemajärjestelmä (Tumma/Vaalea) ja värivalinnat.</li>
+                    <li>Lisätty visuaalinen valinta: Oskillooskooppi (Aalto) ja Spektrianalyysi (Palkit).</li>
+                    <li>Lisätty herkkyyden säätö.</li>
+                    <li>Lisätty versionumerointi kaikkiin tiedostoihin.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v0.2.0</div>
+                <ul>
+                    <li>Ensimmäinen toimiva visualisointi Web Audio API:lla.</li>
+                    <li>Lisätty säätimet värille ja viivan paksuudelle.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v0.1.0</div>
+                <ul>
+                    <li>Konseptin luominen.</li>
+                    <li>PWA-valmius (manifest.json ja Service Worker).</li>
+                    <li>Mikrofonin käyttöoikeuksien hallinta.</li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <script src="app.js?v=1.0.0"></script>
 </body>
 </html>
