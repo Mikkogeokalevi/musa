@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.6.1</title>
-    <link rel="stylesheet" href="style.css?v=1.6.1">
+    <title>Audio Scope Pro - v1.7.0</title>
+    <link rel="stylesheet" href="style.css?v=1.7.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -78,7 +78,16 @@
             <h1>Kehityshistoria</h1>
 
             <section class="history-item">
-                <div class="version-tag">v1.6.1 (Nykyinen)</div>
+                <div class="version-tag">v1.7.0 (Nykyinen)</div>
+                <ul>
+                    <li>Vesiputous-korjaus: Poistettu globalAlpha-käyttö kokonaan, mikä korjaa koko näytön värjäytymisen. Tiukennettu noise gate kynnysarvoon 70.</li>
+                    <li>Palkit-korjaus: Pakotettu värikylläisyys 100 %:iin ja säädetty vaaleus kiinteäksi (35-40 % teemasta riippuen), mikä poistaa haaleuden vaaleassa teemassa.</li>
+                    <li>Viivan laatu: Lisätty lineCap 'round' ja paksuus 4px, jotta aaltomuodot ovat pehmeämpiä ja selkeämpiä.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.6.1</div>
                 <ul>
                     <li>Kontrastikorjaus: Säädetty visualisointien värikylläisyyttä ja vaaleutta (lightness) teeman mukaan. Vaaleassa teemassa käytetään nyt tummempia dynaamisia värejä paremman näkyvyyden takaamiseksi.</li>
                     <li>Vesiputous-parannus: Spectrogramin värit optimoitu toimimaan sekä vaalealla että tummalla pohjalla ilman haaleutta.</li>
@@ -192,6 +201,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.6.1"></script>
+    <script src="app.js?v=1.7.0"></script>
 </body>
 </html>
