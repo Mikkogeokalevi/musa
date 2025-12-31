@@ -1,8 +1,9 @@
-/* Versio 1.5.0 */
+/* Versio 1.5.2 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
 
+// Elementit
 const startBtn = document.getElementById('startBtn');
 const themeSelect = document.getElementById('themeSelect');
 const colorSelect = document.getElementById('colorSelect');
@@ -13,13 +14,28 @@ const dbDisplay = document.getElementById('dbDisplay');
 
 let wakeLock = null;
 
+// KORJAUS: showPage-funktio pitää olla globaalisti saatavilla
+window.showPage = function(pageId) {
+    // Piilotetaan kaikki sivut
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    // Näytetään valittu sivu
+    const activePage = document.getElementById(pageId);
+    if (activePage) {
+        activePage.classList.remove('hidden');
+    }
+    // Jos palataan skooppiin, varmistetaan canvaksen koko
+    if(pageId === 'scope-page') resize();
+};
+
 function loadSettings() {
     const savedTheme = localStorage.getItem('scope_theme') || 'dark';
     const savedColor = localStorage.getItem('scope_color') || '#0f0';
     const savedMode = localStorage.getItem('scope_mode') || 'wave';
+
     themeSelect.value = savedTheme;
     colorSelect.value = savedColor;
     visualMode.value = savedMode;
+
     document.body.setAttribute('data-theme', savedTheme);
     document.documentElement.style.setProperty('--accent-color', savedColor);
 }
@@ -88,13 +104,11 @@ function draw() {
     const amp = sensitivity.value / 5;
     const bgColor = getComputedStyle(document.body).backgroundColor;
 
-    // Haetaan molemmat datatyypit
     let timeData = new Uint8Array(bufferLength);
     let freqData = new Uint8Array(bufferLength);
     analyser.getByteTimeDomainData(timeData);
     analyser.getByteFrequencyData(freqData);
 
-    // Mittarit
     let freq = autoCorrelate(timeData, audioCtx.sampleRate);
     hzDisplay.innerText = freq === -1 ? "--- Hz" : Math.round(freq) + " Hz";
     let sum = 0;
@@ -110,7 +124,7 @@ function draw() {
         let barWidth = canvas.width / (bufferLength / 2);
         for (let i = 0; i < bufferLength / 2; i++) {
             let val = freqData[i] * amp;
-            if (val < 50) { ctx.fillStyle = bgColor; } // Noise gate
+            if (val < 50) { ctx.fillStyle = bgColor; }
             else {
                 ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)` : `rgba(${parseInt(accentColor.slice(1,3), 16)}, ${parseInt(accentColor.slice(3,5), 16)}, ${parseInt(accentColor.slice(5,7), 16)}, ${val/255})`;
             }
@@ -157,6 +171,23 @@ function draw() {
         }
     }
 }
+
+themeSelect.onchange = (e) => {
+    const val = e.target.value;
+    document.body.setAttribute('data-theme', val);
+    localStorage.setItem('scope_theme', val);
+};
+
+colorSelect.onchange = (e) => {
+    const val = e.target.value;
+    document.documentElement.style.setProperty('--accent-color', val);
+    localStorage.setItem('scope_color', val);
+};
+
+visualMode.onchange = (e) => {
+    localStorage.setItem('scope_mode', e.target.value);
+};
+
 window.onresize = resize;
 resize();
 loadSettings();
