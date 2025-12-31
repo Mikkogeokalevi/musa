@@ -1,3 +1,4 @@
+/* Versio 1.0.0 */
 :root {
     --bg-color: #050505;
     --panel-bg: #111;
@@ -5,7 +6,6 @@
     --accent-color: #0f0;
 }
 
-/* Päiväsaika-teema */
 [data-theme="light"] {
     --bg-color: #f0f0f0;
     --panel-bg: #ddd;
@@ -17,45 +17,58 @@ body {
     margin: 0;
     background: var(--bg-color);
     color: var(--text-color);
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow: hidden;
-    transition: background 0.3s, color 0.3s;
 }
+
+.top-nav {
+    display: flex;
+    background: #000;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+.top-nav button {
+    flex: 1;
+    background: none;
+    color: var(--text-color);
+    border: none;
+    padding: 15px;
+    font-weight: bold;
+    border-radius: 0;
+}
+
+.page { height: calc(100vh - 50px); overflow-y: auto; }
+.hidden { display: none; }
 
 canvas {
     display: block;
     width: 100vw;
-    height: 55vh;
+    height: 50vh;
     background: var(--bg-color);
 }
 
 .ui-panel {
     padding: 15px;
     background: var(--panel-bg);
-    height: 45vh;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    box-sizing: border-box;
 }
 
-.control-group { display: flex; flex-direction: column; gap: 5px; }
-label { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; }
-
-select, input {
-    padding: 10px;
-    background: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--accent-color);
-    border-radius: 5px;
+.history-container { padding: 20px; }
+.history-item { 
+    margin-bottom: 25px; 
+    border-left: 3px solid var(--accent-color); 
+    padding-left: 15px; 
 }
+.version-tag { font-weight: bold; color: var(--accent-color); margin-bottom: 5px; }
 
-button {
+button#startBtn {
     grid-column: span 2;
     background: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 15px;
+    color: #000;
     font-weight: bold;
+    padding: 15px;
     border-radius: 8px;
+    border: none;
 }
