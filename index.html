@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.8.0</title>
-    <link rel="stylesheet" href="style.css?v=1.8.0">
+    <title>Audio Scope Pro - v1.9.0</title>
+    <link rel="stylesheet" href="style.css?v=1.9.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -78,11 +78,19 @@
             <h1>Kehityshistoria</h1>
 
             <section class="history-item">
-                <div class="version-tag">v1.8.0 (Nykyinen)</div>
+                <div class="version-tag">v1.9.0 (Nykyinen)</div>
                 <ul>
-                    <li>Käynnistyslogiikan korjaus: Varmistettu, että "Käynnistä mikrofoni" -nappi tulee aina näkyviin sivun päivityksen jälkeen.</li>
-                    <li>AudioContext-hallinta: Lisätty resume-kutsu, joka estää audion jumiutumisen mobiiliselaimissa.</li>
-                    <li>Pohjustus Freeze-toiminnolle: Lisätty isPaused-muuttuja ja logiikka visualisoinnin pysäyttämiseksi.</li>
+                    <li>Käynnistyslogiikan uudelleenrakennus: Siirrytty vakaaseen v1.8.3 pohjaan, joka varmistaa "Käynnistä mikrofoni" -napin näkyvyyden kaikissa tilanteissa.</li>
+                    <li>Vesiputous- ja Palkit-korjaus: Palautettu kirkkaat värit ja poistettu haaleus ilman, että koodin vakaus kärsii.</li>
+                    <li>Hz- ja dB-mittarien palautus: Kaikki numeeriset mittarit toimivat jälleen.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.8.0 - v1.8.3</div>
+                <ul>
+                    <li>Kriittisiä korjauksia AudioContext-ongelmiin ja käynnistysnapin näkyvyyteen mobiiliselaimilla.</li>
+                    <li>Välimuistiongelmien hallintaa ja z-index korjauksia.</li>
                 </ul>
             </section>
 
@@ -90,8 +98,8 @@
                 <div class="version-tag">v1.7.0</div>
                 <ul>
                     <li>Vesiputous-korjaus: Poistettu globalAlpha-käyttö kokonaan, mikä korjaa koko näytön värjäytymisen. Tiukennettu noise gate kynnysarvoon 70.</li>
-                    <li>Palkit-korjaus: Pakotettu värikylläisyys 100 %:iin ja säädetty vaaleus kiinteäksi (35-40 % teemasta riippuen), mikä poistaa haaleuden vaaleassa teemassa.</li>
-                    <li>Viivan laatu: Lisätty lineCap 'round' ja paksuus 4px, jotta aaltomuodot ovat pehmeämpiä ja selkeämpiä.</li>
+                    <li>Palkit-korjaus: Pakotettu värikylläisyys 100 %:iin ja säädetty vaaleus kiinteäksi (35-40 % teemasta riippuen).</li>
+                    <li>Viivan laatu: Lisätty lineCap 'round' ja paksuus 4px.</li>
                 </ul>
             </section>
 
@@ -189,6 +197,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.8.0"></script>
+    <script src="app.js?v=1.9.0"></script>
 </body>
 </html>
