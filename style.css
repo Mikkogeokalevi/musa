@@ -1,4 +1,4 @@
-/* Versio 1.0.0 */
+/* Versio 1.2.0 */
 :root {
     --bg-color: #050505;
     --panel-bg: #111;
@@ -7,10 +7,10 @@
 }
 
 [data-theme="light"] {
-    --bg-color: #f0f0f0;
-    --panel-bg: #ddd;
+    --bg-color: #f5f5f5;
+    --panel-bg: #ffffff;
     --text-color: #222;
-    --accent-color: #0055ff;
+    --accent-color: #0066ff;
 }
 
 body {
@@ -19,56 +19,131 @@ body {
     color: var(--text-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow: hidden;
+    user-select: none;
 }
 
+/* Navigointi */
 .top-nav {
     display: flex;
     background: #000;
     border-bottom: 1px solid var(--accent-color);
+    height: 60px;
 }
 
 .top-nav button {
     flex: 1;
-    background: none;
-    color: var(--text-color);
+    background: transparent;
+    color: #fff;
     border: none;
-    padding: 15px;
+    font-size: 0.8rem;
     font-weight: bold;
-    border-radius: 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
 }
 
-.page { height: calc(100vh - 50px); overflow-y: auto; }
+.top-nav button:active {
+    background: rgba(255,255,255,0.1);
+}
+
+/* Sivun rakenne */
+.page { 
+    height: calc(100vh - 60px); 
+    overflow-y: auto; 
+    position: relative;
+}
+
 .hidden { display: none; }
 
+/* Skooppi-näkymä */
 canvas {
     display: block;
     width: 100vw;
-    height: 50vh;
+    height: 70vh;
     background: var(--bg-color);
+    touch-action: none;
 }
 
-.ui-panel {
-    padding: 15px;
+.info-overlay {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.7rem;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.ui-panel-minimal {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Asetukset-sivu */
+.settings-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.settings-container h1 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.control-group { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    margin-bottom: 20px;
+}
+
+label { 
+    font-size: 0.8rem; 
+    text-transform: uppercase; 
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+select, input[type="range"] {
+    width: 100%;
+    padding: 12px;
     background: var(--panel-bg);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    color: var(--text-color);
+    border: 1px solid #444;
+    border-radius: 8px;
+    font-size: 1rem;
 }
 
+/* Historia-sivu */
 .history-container { padding: 20px; }
 .history-item { 
-    margin-bottom: 25px; 
-    border-left: 3px solid var(--accent-color); 
+    margin-bottom: 30px; 
+    border-left: 4px solid var(--accent-color); 
     padding-left: 15px; 
 }
-.version-tag { font-weight: bold; color: var(--accent-color); margin-bottom: 5px; }
+
+.version-tag { 
+    font-weight: bold; 
+    font-family: monospace;
+    background: var(--accent-color);
+    color: #000;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
 
 button#startBtn {
-    grid-column: span 2;
     background: var(--accent-color);
     color: #000;
     font-weight: bold;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 18px 40px;
+    border-radius: 50px;
     border: none;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
