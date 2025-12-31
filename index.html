@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.2.0</title>
-    <link rel="stylesheet" href="style.css?v=1.2.0">
+    <title>Audio Scope Pro - v1.3.0</title>
+    <link rel="stylesheet" href="style.css?v=1.3.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -16,8 +16,20 @@
     </nav>
 
     <div id="scope-page" class="page">
+        <div class="meter-bar">
+            <div class="meter">
+                <span class="label">Taajuus:</span>
+                <span id="hzDisplay" class="value">--- Hz</span>
+            </div>
+            <div class="meter">
+                <span class="label">Taso:</span>
+                <span id="dbDisplay" class="value">--- dB</span>
+            </div>
+        </div>
+
         <canvas id="scope"></canvas>
         <div class="info-overlay">Paina skooppia vaihtaaksesi tilaa</div>
+        
         <div class="ui-panel-minimal">
             <button id="startBtn">KÄYNNISTÄ MIKROFONI</button>
         </div>
@@ -64,42 +76,42 @@
             <h1>Kehityshistoria</h1>
             
             <section class="history-item">
-                <div class="version-tag">v1.2.0 (Nykyinen)</div>
+                <div class="version-tag">v1.3.0 (Nykyinen)</div>
                 <ul>
-                    <li>Lisätty Screen Wake Lock API: Estää näytön sammumisen sovelluksen ollessa aktiivinen.</li>
-                    <li>Uusi näkymä: Spectrogram (Vesiputous), joka näyttää taajuudet ajan funktiona.</li>
-                    <li>Interaktiivisuus: Skoopilla on nyt klikkaus-tunnistus, jolla voi vaihtaa näkymää nopeasti.</li>
-                    <li>Käyttöliittymäuudistus: Asetukset siirretty omalle sivulleen, jotta skooppi saa enemmän tilaa.</li>
-                    <li>Parannettu herkkyysskaalaa (1-25).</li>
+                    <li>Lisätty reaaliaikainen taajuuden tunnistus (Hz).</li>
+                    <li>Lisätty RMS-pohjainen äänenvoimakkuusmittari (dB).</li>
+                    <li>Lisätty yläpalkki mittareiden numeerista seurantaa varten.</li>
+                    <li>Päivitetty FFT-koko tarkempaa analyysia varten.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.2.0</div>
+                <ul>
+                    <li>Lisätty Screen Wake Lock: Näyttö pysyy päällä.</li>
+                    <li>Lisätty Spectrogram-näkymä.</li>
+                    <li>Skoopin klikkaus vaihtaa tilaa.</li>
+                    <li>Asetukset siirretty omalle sivulleen.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.1.0</div>
                 <ul>
-                    <li>Lisätty LocalStorage-tuki: Sovellus muistaa asetukset.</li>
+                    <li>LocalStorage-tuki asetusten muistamiseen.</li>
                     <li>Laajennettu värivalikoimaa.</li>
-                    <li>Päivitetty latausjärjestys välkkymisen estämiseksi.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.0.0</div>
                 <ul>
-                    <li>Projektin modulointi (HTML, CSS, JS).</li>
-                    <li>Navigointijärjestelmä ja perus-skooppi.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v0.1.0 - v0.2.0</div>
-                <ul>
-                    <li>Konsepti, PWA-perusta ja ensimmäiset Web Audio -kokeilut.</li>
+                    <li>Projektin modulointi ja perusrakenteet.</li>
                 </ul>
             </section>
         </div>
     </div>
 
-    <script src="app.js?v=1.2.0"></script>
+    <script src="app.js?v=1.3.0"></script>
 </body>
 </html>
