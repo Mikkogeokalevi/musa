@@ -1,0 +1,20 @@
+{
+  "name": "Audio Scope PWA",
+  "short_name": "Skooppi",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00ff00",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/00ff00/000000?text=Scope",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/00ff00/000000?text=Scope",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
