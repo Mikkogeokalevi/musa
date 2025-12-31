@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v2.1.0</title>
-    <link rel="stylesheet" href="style.css?v=2.1.0">
+    <title>Audio Scope Pro - v2.2.0</title>
+    <link rel="stylesheet" href="style.css?v=2.2.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -61,9 +61,11 @@
                 <label>Visualisointi</label>
                 <select id="visualMode">
                     <option value="wave">Aalto (Oscilloscope)</option>
+                    <option value="mirror">Peilattu Aalto (Mirror)</option>
                     <option value="bars">Palkit (FFT)</option>
                     <option value="spectrogram">Vesiputous (Spectrogram)</option>
                     <option value="circular">Ympyrä (Circular)</option>
+                    <option value="star">Tähti (Star Burst)</option>
                 </select>
             </div>
             <div class="control-group">
@@ -78,25 +80,34 @@
             <h1>Kehityshistoria</h1>
 
             <section class="history-item">
-                <div class="version-tag">v2.1.0 (Nykyinen)</div>
+                <div class="version-tag">v2.2.0 (Nykyinen)</div>
                 <ul>
-                    <li>Resoluutio-optimoitu piirto: Palkkien leveys säätyy dynaamisesti näytön leveyden mukaan. Korjaa pystyasennon haaleat värit käyttämällä leveämpiä ja selkeämpiä palkkeja.</li>
-                    <li>Älykäs taajuusryhmittely: Yhdistää taajuusdataa pystyasennossa värikylläisyyden maksimoimiseksi.</li>
+                    <li>Uusi näkymä - Star Burst: Keskipisteestä räjähtävä taajuusvisualisointi.</li>
+                    <li>Uusi näkymä - Mirror Wave: Symmetrisesti peilattu oskilloskooppi-aalto.</li>
+                    <li>Navigoinnin hienosäätö: Uudet näkymät lisätty klikkaus-kiertoon ja asetuksiin.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v2.1.0</div>
+                <ul>
+                    <li>Resoluutio-optimoitu piirto: Palkkien leveys säätyy dynaamisesti näytön leveyden mukaan. Korjaa pystyasennon haaleat värit.</li>
+                    <li>Älykäs taajuusryhmittely värikylläisyyden maksimoimiseksi.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v2.0.1</div>
                 <ul>
-                    <li>Historia-korjaus: Palautettu kaikki v1.0.0 - v1.4.0 väliset vaiheet yksitellen, poistettu virheellinen tiivistys.</li>
+                    <li>Historia-korjaus: Palautettu kaikki v1.0.0 - v1.4.0 väliset vaiheet yksitellen.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v2.0.0</div>
                 <ul>
-                    <li>Peak Hold -toiminto: Palkkinäkymään lisätty maksimitason muisti dynaamisilla viivoilla.</li>
-                    <li>Taajuusasteikon merkinnät: Lisätty tekstit "BASSO", "KESKIÄÄNET" ja "DISKANTTI".</li>
+                    <li>Peak Hold -toiminto: Palkkinäkymään lisätty maksimitason muisti.</li>
+                    <li>Taajuusasteikon merkinnät: "BASSO", "KESKIÄÄNET" ja "DISKANTTI".</li>
                     <li>Dynaaminen dB-mittari: Mittari muuttuu punaiseksi yli 85 dB tasolla.</li>
                 </ul>
             </section>
@@ -104,93 +115,62 @@
             <section class="history-item">
                 <div class="version-tag">v1.9.0</div>
                 <ul>
-                    <li>Käynnistyslogiikan uudelleenrakennus: Siirrytty vakaaseen v1.8.3 pohjaan napin näkyvyyden varmistamiseksi.</li>
+                    <li>Käynnistyslogiikan uudelleenrakennus napin näkyvyyden varmistamiseksi.</li>
                     <li>Vesiputous- ja Palkit-korjaus: Palautettu kirkkaat dynaamiset värit.</li>
                 </ul>
             </section>
 
             <section class="history-item">
-                <div class="version-tag">v1.8.0 - v1.8.3</div>
+                <div class="version-tag">v1.5.0 - v1.8.3</div>
                 <ul>
-                    <li>Kriittisiä korjauksia AudioContext-ongelmiin ja käynnistysnapin näkyvyyteen mobiiliselaimilla.</li>
-                    <li>Välimuistiongelmien hallintaa ja z-index korjauksia.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v1.7.0</div>
-                <ul>
-                    <li>Vesiputous-korjaus: Poistettu globalAlpha, tiukennettu noise gate kynnysarvoon 70.</li>
-                    <li>Palkit-korjaus: Pakotettu värikylläisyys 100 %:iin.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v1.6.0 - v1.6.1</div>
-                <ul>
-                    <li>Kontrastikorjaus ja sateenkaari-tuki kaikkiin näkymiin.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v1.5.0 - v1.5.2</div>
-                <ul>
-                    <li>Uusi "Ympyrä"-näkymä ja navigointikorjauksia.</li>
+                    <li>Ympyrä-näkymä, navigointikorjaukset ja kriittiset AudioContext-päivitykset mobiililaitteille.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.4.0</div>
                 <ul>
-                    <li>Korjattu Vesiputous (Spectrogram): Lisätty Noise Gate -logiikka.</li>
-                    <li>Uusi väriominaisuus: "Sateenkaari" (Rainbow) tila.</li>
-                    <li>Pienennetty FFT-alueen visualisointia kuultaville taajuuksille (0-11kHz).</li>
+                    <li>Spectrogramin Noise Gate ja Sateenkaari (Rainbow) -tila.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.3.0</div>
                 <ul>
-                    <li>Lisätty reaaliaikainen taajuuden tunnistus (Hz).</li>
-                    <li>Lisätty RMS-pohjainen äänenvoimakkuusmittari (dB).</li>
-                    <li>Lisätty yläpalkki mittareiden numeerista seurantaa varten.</li>
+                    <li>Hz-tunnistus ja dB-mittari (RMS).</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.2.0</div>
                 <ul>
-                    <li>Lisätty Screen Wake Lock API.</li>
-                    <li>Uusi näkymä: Spectrogram (Vesiputous).</li>
-                    <li>Interaktiivisuus: Klikkaus-tunnistus näkymän vaihtoon.</li>
+                    <li>Screen Wake Lock ja Vesiputous-näkymä.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.1.0</div>
                 <ul>
-                    <li>Lisätty LocalStorage-tuki asetusten tallennukseen.</li>
-                    <li>Laajennettu värivalikoimaa.</li>
+                    <li>LocalStorage-tuki ja laajennettu värivalikoima.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.0.0</div>
                 <ul>
-                    <li>Projektin modulointi ja perusrakenteet.</li>
-                    <li>Teemajärjestelmä ja perusvisualisoinnit.</li>
+                    <li>Projektin perusrakenteet ja navigointijärjestelmä.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v0.1.0 - v0.2.0</div>
                 <ul>
-                    <li>Konsepti, PWA-valmius ja ensimmäiset Web Audio API -kokeilut.</li>
+                    <li>Ensimmäiset kokeilut ja PWA-pohja.</li>
                 </ul>
             </section>
         </div>
     </div>
 
-    <script src="app.js?v=2.1.0"></script>
+    <script src="app.js?v=2.2.0"></script>
 </body>
 </html>
