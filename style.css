@@ -162,13 +162,19 @@ select, input[type="range"] {
     margin-bottom: 10px;
 }
 
-button#startBtn {
+bbutton#startBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999 !important; /* Pakotetaan kaiken päälle */
     background: var(--accent-color);
     color: #000;
     font-weight: bold;
-    padding: 15px 35px;
+    padding: 20px 40px;
     border-radius: 50px;
     border: none;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-size: 1.2rem;
+    display: block;
+    visibility: visible;
 }
