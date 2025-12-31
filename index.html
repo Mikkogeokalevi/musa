@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v2.0.0</title>
-    <link rel="stylesheet" href="style.css?v=2.0.0">
+    <title>Audio Scope Pro - v2.0.1</title>
+    <link rel="stylesheet" href="style.css?v=2.0.1">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -78,21 +78,28 @@
             <h1>Kehityshistoria</h1>
 
             <section class="history-item">
-                <div class="version-tag">v2.0.0 (Nykyinen)</div>
+                <div class="version-tag">v2.0.1 (Nykyinen)</div>
                 <ul>
-                    <li>Peak Hold -toiminto: Palkkinäkymään lisätty maksimitason muisti, joka jättää ohuen viivan hetkeksi ylimpään kohtaan.</li>
-                    <li>Taajuusasteikon merkinnät: Lisätty tekstit "BASSO", "KESKIÄÄNET" ja "DISKANTTI" helpottamaan taajuusanalyysia.</li>
-                    <li>Dynaaminen dB-mittari: Tasomittari vaihtaa värin punaiseksi, kun äänenvoimakkuus ylittää 85 dB (varoitusraja).</li>
-                    <li>Värien hienosäätö: Varmistettu maksimaalinen kontrasti kaikissa näkymissä dynaamisen lightness-säädön avulla.</li>
+                    <li>Historia-korjaus: Palautettu kaikki v1.0.0 - v1.4.0 väliset vaiheet yksitellen, poistettu virheellinen tiivistys.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v2.0.0</div>
+                <ul>
+                    <li>Peak Hold -toiminto: Palkkinäkymään lisätty maksimitason muisti dynaamisilla viivoilla.</li>
+                    <li>Taajuusasteikon merkinnät: Lisätty tekstit "BASSO", "KESKIÄÄNET" ja "DISKANTTI".</li>
+                    <li>Dynaaminen dB-mittari: Mittari muuttuu punaiseksi yli 85 dB tasolla.</li>
+                    <li>Värien hienosäätö: Maksimoitu kontrasti kaikissa näkymissä.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.9.0</div>
                 <ul>
-                    <li>Käynnistyslogiikan uudelleenrakennus: Siirrytty vakaaseen v1.8.3 pohjaan, joka varmistaa "Käynnistä mikrofoni" -napin näkyvyyden.</li>
-                    <li>Vesiputous- ja Palkit-korjaus: Palautettu kirkkaat värit ja poistettu haaleus.</li>
-                    <li>Hz- ja dB-mittarien palautus: Kaikki numeeriset mittarit toimivat jälleen.</li>
+                    <li>Käynnistyslogiikan uudelleenrakennus: Siirrytty vakaaseen v1.8.3 pohjaan napin näkyvyyden varmistamiseksi.</li>
+                    <li>Vesiputous- ja Palkit-korjaus: Palautettu kirkkaat dynaamiset värit.</li>
+                    <li>Hz- ja dB-mittarien palautus toimintakuntoon.</li>
                 </ul>
             </section>
 
@@ -135,7 +142,7 @@
                     <li>Kriittinen korjaus: Korjattu navigointinappien toiminta globaalilla window-kontekstilla.</li>
                 </ul>
             </section>
-            
+
             <section class="history-item">
                 <div class="version-tag">v1.5.1</div>
                 <ul>
@@ -151,21 +158,62 @@
             </section>
 
             <section class="history-item">
-                <div class="version-tag">v1.0.0 - v1.4.0</div>
+                <div class="version-tag">v1.4.0</div>
                 <ul>
-                    <li>Projektin perusrakenteet, LocalStorage, Hz/dB-mittarit, Vesiputous-näkymä ja Sateenkaari-värit.</li>
+                    <li>Korjattu Vesiputous (Spectrogram): Lisätty Noise Gate -logiikka.</li>
+                    <li>Uusi väriominaisuus: "Sateenkaari" (Rainbow) tila.</li>
+                    <li>Suorituskykyoptimointi Canvas-piirrolle.</li>
+                    <li>Pienennetty FFT-alueen visualisointia kuultaville taajuuksille (0-11kHz).</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.3.0</div>
+                <ul>
+                    <li>Lisätty reaaliaikainen taajuuden tunnistus (Hz).</li>
+                    <li>Lisätty RMS-pohjainen äänenvoimakkuusmittari (dB).</li>
+                    <li>Lisätty yläpalkki mittareiden numeerista seurantaa varten.</li>
+                    <li>Päivitetty FFT-koko tarkempaa analyysia varten.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.2.0</div>
+                <ul>
+                    <li>Lisätty Screen Wake Lock API: Näyttö pysyy päällä.</li>
+                    <li>Uusi näkymä: Spectrogram (Vesiputous).</li>
+                    <li>Interaktiivisuus: Klikkaus-tunnistus näkymän vaihtoon.</li>
+                    <li>Käyttöliittymäuudistus: Asetukset omalla sivullaan.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.1.0</div>
+                <ul>
+                    <li>Lisätty LocalStorage-tuki asetusten tallennukseen.</li>
+                    <li>Laajennettu värivalikoimaa.</li>
+                    <li>Välkkymisen esto asetusten latauksessa.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.0.0</div>
+                <ul>
+                    <li>Projektin modulointi ja perusrakenteet.</li>
+                    <li>Navigointijärjestelmä toteutettu.</li>
+                    <li>Teemajärjestelmä ja perusvisualisoinnit (Aalto/Palkit).</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v0.1.0 - v0.2.0</div>
                 <ul>
-                    <li>Konsepti, PWA-valmius ja ensimmäinen toimiva Web Audio API -visualisointi.</li>
+                    <li>Konsepti, PWA-valmius ja ensimmäiset Web Audio API visualisointikokeilut.</li>
                 </ul>
             </section>
         </div>
     </div>
 
-    <script src="app.js?v=2.0.0"></script>
+    <script src="app.js?v=2.0.1"></script>
 </body>
 </html>
