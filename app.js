@@ -1,8 +1,9 @@
-/* Versio 1.8.2 - PAKOTETTU KÄYNNISTYS */
+/* Versio 1.5.2 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
 
+// Elementit
 const startBtn = document.getElementById('startBtn');
 const themeSelect = document.getElementById('themeSelect');
 const colorSelect = document.getElementById('colorSelect');
@@ -11,42 +12,37 @@ const sensitivity = document.getElementById('sensitivity');
 const hzDisplay = document.getElementById('hzDisplay');
 const dbDisplay = document.getElementById('dbDisplay');
 
-let isPaused = false;
+let wakeLock = null;
 
-// Navigointi - Varmistetaan että sivu vaihtuu
+// KORJAUS: showPage-funktio pitää olla globaalisti saatavilla
 window.showPage = function(pageId) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(p => p.classList.add('hidden'));
+    // Piilotetaan kaikki sivut
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    // Näytetään valittu sivu
     const activePage = document.getElementById(pageId);
     if (activePage) {
         activePage.classList.remove('hidden');
     }
-    if(pageId === 'scope-page') {
-        resize();
-        // Pakotetaan nappi näkyviin jos audio ei ole käynnissä
-        if (!audioCtx || audioCtx.state !== 'running') {
-            startBtn.style.display = 'block';
-            startBtn.style.visibility = 'visible';
-            startBtn.style.opacity = '1';
-        }
-    }
+    // Jos palataan skooppiin, varmistetaan canvaksen koko
+    if(pageId === 'scope-page') resize();
 };
 
 function loadSettings() {
     const savedTheme = localStorage.getItem('scope_theme') || 'dark';
     const savedColor = localStorage.getItem('scope_color') || '#0f0';
     const savedMode = localStorage.getItem('scope_mode') || 'wave';
-    
+
     themeSelect.value = savedTheme;
     colorSelect.value = savedColor;
     visualMode.value = savedMode;
-    
+
     document.body.setAttribute('data-theme', savedTheme);
     document.documentElement.style.setProperty('--accent-color', savedColor);
-    
-    // PAKOTETTU NÄKYVYYS LATAUKSESSA
-    startBtn.style.setProperty('display', 'block', 'important');
-    startBtn.style.setProperty('visibility', 'visible', 'important');
+}
+
+async function requestWakeLock() {
+    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } 
+    catch (err) { console.log("WakeLock error"); }
 }
 
 function resize() {
@@ -55,59 +51,54 @@ function resize() {
 }
 
 canvas.onclick = () => {
-    if (isPaused) { isPaused = false; draw(); return; }
-    if (!audioCtx) return; // Ei vaihdeta tilaa jos ei olla käynnissä
     const modes = ['wave', 'bars', 'spectrogram', 'circular'];
     let nextIdx = (modes.indexOf(visualMode.value) + 1) % modes.length;
     visualMode.value = modes[nextIdx];
     localStorage.setItem('scope_mode', visualMode.value);
 };
 
-// Start-nappi - Suora kuuntelija
-startBtn.addEventListener('click', async function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    try {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        
-        if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-        }
+function autoCorrelate(buf, sampleRate) {
+    let SIZE = buf.length;
+    let rms = 0;
+    for (let i=0; i<SIZE; i++) { let val = buf[i]/128 - 1; rms += val*val; }
+    rms = Math.sqrt(rms/SIZE);
+    if (rms < 0.01) return -1;
+    let r1=0, r2=SIZE-1, thres=0.2;
+    for (let i=0; i<SIZE/2; i++) if (Math.abs(buf[i]/128 - 1) < thres) { r1=i; break; }
+    for (let i=1; i<SIZE/2; i++) if (Math.abs(buf[SIZE-i]/128 - 1) < thres) { r2=SIZE-i; break; }
+    let buf2 = buf.slice(r1,r2);
+    let L = buf2.length;
+    let sum = new Float32Array(L);
+    for (let i=0; i<L; i++) for (let j=0; j<L-i; j++) sum[i] += (buf2[j]/128-1)*(buf2[j+i]/128-1);
+    let d=0; while (sum[d]>sum[d+1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i=d; i<L; i++) if (sum[i] > maxval) { maxval = sum[i]; maxpos = i; }
+    return sampleRate / maxpos;
+}
 
+startBtn.onclick = async () => {
+    try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaStreamSource(stream);
-        
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 2048;
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
-        
         source.connect(analyser);
-        
-        // Piilotetaan vasta onnistumisen jälkeen
-        startBtn.style.setProperty('display', 'none', 'important');
-        isPaused = false;
+        startBtn.style.display = 'none';
+        requestWakeLock();
         draw();
-        
-        if ('wakeLock' in navigator) {
-            navigator.wakeLock.request('screen').catch(() => {});
-        }
-    } catch (err) {
-        alert("MIKROFONI-VIRHE: " + err.message);
-    }
-}, { passive: false });
+    } catch (err) { alert("Virhe: " + err); }
+};
 
 const tempCanvas = document.createElement('canvas');
 const tempCtx = tempCanvas.getContext('2d');
 
 function draw() {
-    if (!analyser || isPaused) return;
+    if (!analyser) return;
     requestAnimationFrame(draw);
     
-    const theme = document.body.getAttribute('data-theme');
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
     const mode = visualMode.value;
     const amp = sensitivity.value / 5;
@@ -118,9 +109,11 @@ function draw() {
     analyser.getByteTimeDomainData(timeData);
     analyser.getByteFrequencyData(freqData);
 
+    let freq = autoCorrelate(timeData, audioCtx.sampleRate);
+    hzDisplay.innerText = freq === -1 ? "--- Hz" : Math.round(freq) + " Hz";
     let sum = 0;
     for(let i=0; i<timeData.length; i++) { let x = (timeData[i]/128.0)-1; sum += x*x; }
-    let db = 20 * Math.log10(Math.sqrt(sum/timeData.length) || 0.00001);
+    let db = 20 * Math.log10(Math.sqrt(sum/timeData.length));
     dbDisplay.innerText = Math.round(Math.max(0, db + 100)) + " dB";
 
     if (mode === 'spectrogram') {
@@ -131,42 +124,33 @@ function draw() {
         let barWidth = canvas.width / (bufferLength / 2);
         for (let i = 0; i < bufferLength / 2; i++) {
             let val = freqData[i] * amp;
-            if (val < 70) { 
-                ctx.fillStyle = bgColor; 
-            } else {
-                let lightness = (theme === 'light') ? "35%" : "50%";
-                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
+            if (val < 50) { ctx.fillStyle = bgColor; }
+            else {
+                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)` : `rgba(${parseInt(accentColor.slice(1,3), 16)}, ${parseInt(accentColor.slice(3,5), 16)}, ${parseInt(accentColor.slice(5,7), 16)}, ${val/255})`;
             }
             ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
         }
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 4;
-        ctx.lineCap = 'round';
+        ctx.lineWidth = 2;
         ctx.strokeStyle = accentColor;
         ctx.fillStyle = accentColor;
 
         if (mode === 'wave') {
             ctx.beginPath();
             let x = 0;
-            let sliceWidth = canvas.width / bufferLength;
             for (let i = 0; i < bufferLength; i++) {
-                if (colorSelect.value === 'rainbow') {
-                    ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme === 'light' ? '40%' : '50%')})`;
-                }
                 let v = timeData[i] / 128.0;
                 let y = (canvas.height/2) + ((v-1)*(canvas.height/2)*amp);
                 if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                x += sliceWidth;
-                if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
+                x += canvas.width / bufferLength;
             }
             ctx.stroke();
         } else if (mode === 'bars') {
             let barWidth = (canvas.width / (bufferLength / 2)) * 1.5;
             for (let i = 0; i < bufferLength / 2; i++) {
                 let barHeight = freqData[i] * amp;
-                let lightness = (theme === 'light') ? "35%" : "50%";
-                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
+                if (colorSelect.value === 'rainbow') ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 80%, 50%)`;
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
             }
         } else if (mode === 'circular') {
@@ -175,16 +159,12 @@ function draw() {
             const radius = Math.min(centerX, centerY) * 0.4;
             ctx.beginPath();
             for (let i = 0; i < bufferLength; i++) {
-                if (colorSelect.value === 'rainbow') {
-                    ctx.strokeStyle = `hsl(${(i/bufferLength)*360}, 100%, ${(theme === 'light' ? '40%' : '50%')})`;
-                }
                 let v = timeData[i] / 128.0;
                 let r = radius + ((v-1) * radius * amp);
                 let angle = (i / bufferLength) * Math.PI * 2;
                 let x = centerX + Math.cos(angle) * r;
                 let y = centerY + Math.sin(angle) * r;
                 if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                if (colorSelect.value === 'rainbow') { ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y); }
             }
             ctx.closePath();
             ctx.stroke();
@@ -193,14 +173,21 @@ function draw() {
 }
 
 themeSelect.onchange = (e) => {
-    document.body.setAttribute('data-theme', e.target.value);
-    localStorage.setItem('scope_theme', e.target.value);
-};
-colorSelect.onchange = (e) => {
-    document.documentElement.style.setProperty('--accent-color', e.target.value);
-    localStorage.setItem('scope_color', e.target.value);
+    const val = e.target.value;
+    document.body.setAttribute('data-theme', val);
+    localStorage.setItem('scope_theme', val);
 };
 
-window.onload = loadSettings;
+colorSelect.onchange = (e) => {
+    const val = e.target.value;
+    document.documentElement.style.setProperty('--accent-color', val);
+    localStorage.setItem('scope_color', val);
+};
+
+visualMode.onchange = (e) => {
+    localStorage.setItem('scope_mode', e.target.value);
+};
+
 window.onresize = resize;
 resize();
+loadSettings();
