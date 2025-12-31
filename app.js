@@ -1,4 +1,4 @@
-/* Versio 1.8.1 */
+/* Versio 1.8.2 - PAKOTETTU KÄYNNISTYS */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -13,13 +13,23 @@ const dbDisplay = document.getElementById('dbDisplay');
 
 let isPaused = false;
 
-// Navigointi
+// Navigointi - Varmistetaan että sivu vaihtuu
 window.showPage = function(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(p => p.classList.add('hidden'));
     const activePage = document.getElementById(pageId);
-    if (activePage) activePage.classList.remove('hidden');
-    if(pageId === 'scope-page') resize();
+    if (activePage) {
+        activePage.classList.remove('hidden');
+    }
+    if(pageId === 'scope-page') {
+        resize();
+        // Pakotetaan nappi näkyviin jos audio ei ole käynnissä
+        if (!audioCtx || audioCtx.state !== 'running') {
+            startBtn.style.display = 'block';
+            startBtn.style.visibility = 'visible';
+            startBtn.style.opacity = '1';
+        }
+    }
 };
 
 function loadSettings() {
@@ -34,8 +44,9 @@ function loadSettings() {
     document.body.setAttribute('data-theme', savedTheme);
     document.documentElement.style.setProperty('--accent-color', savedColor);
     
-    // Pakotetaan nappi näkyviin latauksessa
-    startBtn.style.display = 'block';
+    // PAKOTETTU NÄKYVYYS LATAUKSESSA
+    startBtn.style.setProperty('display', 'block', 'important');
+    startBtn.style.setProperty('visibility', 'visible', 'important');
 }
 
 function resize() {
@@ -45,16 +56,19 @@ function resize() {
 
 canvas.onclick = () => {
     if (isPaused) { isPaused = false; draw(); return; }
+    if (!audioCtx) return; // Ei vaihdeta tilaa jos ei olla käynnissä
     const modes = ['wave', 'bars', 'spectrogram', 'circular'];
     let nextIdx = (modes.indexOf(visualMode.value) + 1) % modes.length;
     visualMode.value = modes[nextIdx];
     localStorage.setItem('scope_mode', visualMode.value);
 };
 
-// Start-nappi on KAIKEN A JA O
-startBtn.addEventListener('click', async function() {
+// Start-nappi - Suora kuuntelija
+startBtn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
     try {
-        // Luodaan ja herätetään AudioContext välittömästi tässä funktiossa
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
@@ -73,19 +87,18 @@ startBtn.addEventListener('click', async function() {
         
         source.connect(analyser);
         
-        // Piilotetaan nappi vasta kun kaikki on varmasti käynnissä
-        startBtn.style.display = 'none';
+        // Piilotetaan vasta onnistumisen jälkeen
+        startBtn.style.setProperty('display', 'none', 'important');
         isPaused = false;
         draw();
         
-        // Wake Lock
         if ('wakeLock' in navigator) {
             navigator.wakeLock.request('screen').catch(() => {});
         }
     } catch (err) {
-        alert("Virhe käynnistyksessä: " + err);
+        alert("MIKROFONI-VIRHE: " + err.message);
     }
-});
+}, { passive: false });
 
 const tempCanvas = document.createElement('canvas');
 const tempCtx = tempCanvas.getContext('2d');
@@ -105,7 +118,6 @@ function draw() {
     analyser.getByteTimeDomainData(timeData);
     analyser.getByteFrequencyData(freqData);
 
-    // Päivitetään mittarit
     let sum = 0;
     for(let i=0; i<timeData.length; i++) { let x = (timeData[i]/128.0)-1; sum += x*x; }
     let db = 20 * Math.log10(Math.sqrt(sum/timeData.length) || 0.00001);
@@ -180,21 +192,15 @@ function draw() {
     }
 }
 
-// Tapahtumakuuntelijat asetuksille
-themeSelect.addEventListener('change', (e) => {
+themeSelect.onchange = (e) => {
     document.body.setAttribute('data-theme', e.target.value);
     localStorage.setItem('scope_theme', e.target.value);
-});
-
-colorSelect.addEventListener('change', (e) => {
+};
+colorSelect.onchange = (e) => {
     document.documentElement.style.setProperty('--accent-color', e.target.value);
     localStorage.setItem('scope_color', e.target.value);
-});
+};
 
-visualMode.addEventListener('change', (e) => {
-    localStorage.setItem('scope_mode', e.target.value);
-});
-
+window.onload = loadSettings;
 window.onresize = resize;
 resize();
-loadSettings();
