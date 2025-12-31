@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.9.0</title>
-    <link rel="stylesheet" href="style.css?v=1.9.0">
+    <title>Audio Scope Pro - v2.0.0</title>
+    <link rel="stylesheet" href="style.css?v=2.0.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -78,10 +78,20 @@
             <h1>Kehityshistoria</h1>
 
             <section class="history-item">
-                <div class="version-tag">v1.9.0 (Nykyinen)</div>
+                <div class="version-tag">v2.0.0 (Nykyinen)</div>
                 <ul>
-                    <li>Käynnistyslogiikan uudelleenrakennus: Siirrytty vakaaseen v1.8.3 pohjaan, joka varmistaa "Käynnistä mikrofoni" -napin näkyvyyden kaikissa tilanteissa.</li>
-                    <li>Vesiputous- ja Palkit-korjaus: Palautettu kirkkaat värit ja poistettu haaleus ilman, että koodin vakaus kärsii.</li>
+                    <li>Peak Hold -toiminto: Palkkinäkymään lisätty maksimitason muisti, joka jättää ohuen viivan hetkeksi ylimpään kohtaan.</li>
+                    <li>Taajuusasteikon merkinnät: Lisätty tekstit "BASSO", "KESKIÄÄNET" ja "DISKANTTI" helpottamaan taajuusanalyysia.</li>
+                    <li>Dynaaminen dB-mittari: Tasomittari vaihtaa värin punaiseksi, kun äänenvoimakkuus ylittää 85 dB (varoitusraja).</li>
+                    <li>Värien hienosäätö: Varmistettu maksimaalinen kontrasti kaikissa näkymissä dynaamisen lightness-säädön avulla.</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.9.0</div>
+                <ul>
+                    <li>Käynnistyslogiikan uudelleenrakennus: Siirrytty vakaaseen v1.8.3 pohjaan, joka varmistaa "Käynnistä mikrofoni" -napin näkyvyyden.</li>
+                    <li>Vesiputous- ja Palkit-korjaus: Palautettu kirkkaat värit ja poistettu haaleus.</li>
                     <li>Hz- ja dB-mittarien palautus: Kaikki numeeriset mittarit toimivat jälleen.</li>
                 </ul>
             </section>
@@ -97,8 +107,8 @@
             <section class="history-item">
                 <div class="version-tag">v1.7.0</div>
                 <ul>
-                    <li>Vesiputous-korjaus: Poistettu globalAlpha-käyttö kokonaan, mikä korjaa koko näytön värjäytymisen. Tiukennettu noise gate kynnysarvoon 70.</li>
-                    <li>Palkit-korjaus: Pakotettu värikylläisyys 100 %:iin ja säädetty vaaleus kiinteäksi (35-40 % teemasta riippuen).</li>
+                    <li>Vesiputous-korjaus: Poistettu globalAlpha, tiukennettu noise gate kynnysarvoon 70.</li>
+                    <li>Palkit-korjaus: Pakotettu värikylläisyys 100 %:iin.</li>
                     <li>Viivan laatu: Lisätty lineCap 'round' ja paksuus 4px.</li>
                 </ul>
             </section>
@@ -106,97 +116,56 @@
             <section class="history-item">
                 <div class="version-tag">v1.6.1</div>
                 <ul>
-                    <li>Kontrastikorjaus: Säädetty visualisointien värikylläisyyttä ja vaaleutta (lightness) teeman mukaan.</li>
-                    <li>Vesiputous-parannus: Spectrogramin värit optimoitu toimimaan sekä vaalealla että tummalla pohjalla.</li>
+                    <li>Kontrastikorjaus: Säädetty visualisointien värikylläisyyttä ja vaaleutta teeman mukaan.</li>
+                    <li>Vesiputous-parannus: Spectrogramin värit optimoitu molemmille teemoille.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.6.0</div>
                 <ul>
-                    <li>Visuaalinen parannus: Palkit (FFT) piirretään nyt ilman läpinäkyvyyttä (solid).</li>
-                    <li>Dynaamiset värit: Lisätty sateenkaari-tuki myös aaltomuotoon (Wave) ja ympyrään (Circular).</li>
-                    <li>Viivan vahvistus: Skoopin viivan paksuutta kasvatettu (3px).</li>
+                    <li>Dynaamiset värit: Sateenkaari-tuki aaltomuotoon ja ympyrään.</li>
+                    <li>Viivan vahvistus (3px).</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.5.2</div>
                 <ul>
-                    <li>Kriittinen korjaus: Korjattu yläpalkin navigointinappien toiminta palauttamalla showPage-funktio globaaliin window-kontekstiin.</li>
+                    <li>Kriittinen korjaus: Korjattu navigointinappien toiminta globaalilla window-kontekstilla.</li>
                 </ul>
             </section>
             
             <section class="history-item">
                 <div class="version-tag">v1.5.1</div>
                 <ul>
-                    <li>Korjattu historia: Palautettu kaikki aiemmat kehitysvaiheet täysimittaisina käyttäjän ohjeen mukaisesti.</li>
+                    <li>Korjattu historia: Palautettu kaikki aiemmat kehitysvaiheet täysimittaisina.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.5.0</div>
                 <ul>
-                    <li>Bugikorjaus: Korjattu "Palkit"-näkymä.</li>
-                    <li>Vesiputous-parannus: Noise gate -kynnystä nostettu.</li>
-                    <li>Uusi näkymä: "Ympyrä" (Circular).</li>
+                    <li>Bugikorjaukset ja uusi "Ympyrä" (Circular) -näkymä.</li>
                 </ul>
             </section>
 
             <section class="history-item">
-                <div class="version-tag">v1.4.0</div>
+                <div class="version-tag">v1.0.0 - v1.4.0</div>
                 <ul>
-                    <li>Korjattu Vesiputous (Spectrogram): Lisätty Noise Gate.</li>
-                    <li>Uusi väriominaisuus: "Sateenkaari" (Rainbow) tila.</li>
+                    <li>Projektin perusrakenteet, LocalStorage, Hz/dB-mittarit, Vesiputous-näkymä ja Sateenkaari-värit.</li>
                 </ul>
             </section>
 
             <section class="history-item">
-                <div class="version-tag">v1.3.0</div>
+                <div class="version-tag">v0.1.0 - v0.2.0</div>
                 <ul>
-                    <li>Lisätty reaaliaikainen taajuuden tunnistus (Hz).</li>
-                    <li>Lisätty RMS-pohjainen äänenvoimakkuusmittari (dB).</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v1.2.0</div>
-                <ul>
-                    <li>Lisätty Screen Wake Lock API.</li>
-                    <li>Uusi näkymä: Spectrogram (Vesiputous).</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v1.1.0</div>
-                <ul>
-                    <li>Lisätty LocalStorage-tuki.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v1.0.0</div>
-                <ul>
-                    <li>Projektin modulointi: HTML, CSS ja JS omiin tiedostoihinsa.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v0.2.0</div>
-                <ul>
-                    <li>Web Audio API perustoiminnallisuus.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v0.1.0</div>
-                <ul>
-                    <li>Konsepti ja PWA-valmius.</li>
+                    <li>Konsepti, PWA-valmius ja ensimmäinen toimiva Web Audio API -visualisointi.</li>
                 </ul>
             </section>
         </div>
     </div>
 
-    <script src="app.js?v=1.9.0"></script>
+    <script src="app.js?v=2.0.0"></script>
 </body>
 </html>
