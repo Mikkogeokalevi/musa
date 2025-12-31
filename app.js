@@ -1,4 +1,4 @@
-/* Versio 1.4.0 */
+/* Versio 1.5.0 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -35,13 +35,12 @@ function resize() {
 }
 
 canvas.onclick = () => {
-    const modes = ['wave', 'bars', 'spectrogram'];
+    const modes = ['wave', 'bars', 'spectrogram', 'circular'];
     let nextIdx = (modes.indexOf(visualMode.value) + 1) % modes.length;
     visualMode.value = modes[nextIdx];
     localStorage.setItem('scope_mode', visualMode.value);
 };
 
-// Pitch detection
 function autoCorrelate(buf, sampleRate) {
     let SIZE = buf.length;
     let rms = 0;
@@ -64,12 +63,12 @@ function autoCorrelate(buf, sampleRate) {
 startBtn.onclick = async () => {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioCtx = new AudioContext();
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 2048;
         bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(2048);
+        dataArray = new Uint8Array(bufferLength);
         source.connect(analyser);
         startBtn.style.display = 'none';
         requestWakeLock();
@@ -87,77 +86,77 @@ function draw() {
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
     const mode = visualMode.value;
     const amp = sensitivity.value / 5;
+    const bgColor = getComputedStyle(document.body).backgroundColor;
 
-    analyser.getByteTimeDomainData(dataArray);
-    let freq = autoCorrelate(dataArray, audioCtx.sampleRate);
+    // Haetaan molemmat datatyypit
+    let timeData = new Uint8Array(bufferLength);
+    let freqData = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(timeData);
+    analyser.getByteFrequencyData(freqData);
+
+    // Mittarit
+    let freq = autoCorrelate(timeData, audioCtx.sampleRate);
     hzDisplay.innerText = freq === -1 ? "--- Hz" : Math.round(freq) + " Hz";
-
     let sum = 0;
-    for(let i=0; i<dataArray.length; i++) {
-        let x = (dataArray[i] / 128.0) - 1.0;
-        sum += x * x;
-    }
-    let rms = Math.sqrt(sum / dataArray.length);
-    let db = 20 * Math.log10(rms);
+    for(let i=0; i<timeData.length; i++) { let x = (timeData[i]/128.0)-1; sum += x*x; }
+    let db = 20 * Math.log10(Math.sqrt(sum/timeData.length));
     dbDisplay.innerText = Math.round(Math.max(0, db + 100)) + " dB";
 
     if (mode === 'spectrogram') {
-        let freqData = new Uint8Array(bufferLength);
-        analyser.getByteFrequencyData(freqData);
-        
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         tempCtx.drawImage(canvas, 0, 0);
         ctx.drawImage(tempCanvas, 0, -1);
-
-        let barWidth = canvas.width / (bufferLength / 2); // Keskitytään kuultaviin taajuuksiin
+        let barWidth = canvas.width / (bufferLength / 2);
         for (let i = 0; i < bufferLength / 2; i++) {
             let val = freqData[i] * amp;
-            // Noise gate: jos arvo on pieni, piirretään taustaväriä (puhdistaa näkymän)
-            if (val < 40) {
-                ctx.fillStyle = getComputedStyle(document.body).backgroundColor;
-            } else {
-                if (colorSelect.value === 'rainbow') {
-                    ctx.fillStyle = `hsl(${(i / (bufferLength/2)) * 360}, 100%, 50%)`;
-                } else {
-                    ctx.fillStyle = `rgba(${parseInt(accentColor.slice(1,3), 16)}, ${parseInt(accentColor.slice(3,5), 16)}, ${parseInt(accentColor.slice(5,7), 16)}, ${val/255})`;
-                }
+            if (val < 50) { ctx.fillStyle = bgColor; } // Noise gate
+            else {
+                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, 50%)` : `rgba(${parseInt(accentColor.slice(1,3), 16)}, ${parseInt(accentColor.slice(3,5), 16)}, ${parseInt(accentColor.slice(5,7), 16)}, ${val/255})`;
             }
             ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
         }
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2;
+        ctx.strokeStyle = accentColor;
+        ctx.fillStyle = accentColor;
 
         if (mode === 'wave') {
-            ctx.strokeStyle = accentColor;
             ctx.beginPath();
             let x = 0;
-            let sliceWidth = canvas.width / 2048;
-            for (let i = 0; i < 2048; i++) {
-                let v = dataArray[i] / 128.0;
-                let y = (canvas.height / 2) + ((v - 1) * (canvas.height / 2) * amp);
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                x += sliceWidth;
+            for (let i = 0; i < bufferLength; i++) {
+                let v = timeData[i] / 128.0;
+                let y = (canvas.height/2) + ((v-1)*(canvas.height/2)*amp);
+                if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                x += canvas.width / bufferLength;
             }
             ctx.stroke();
         } else if (mode === 'bars') {
-            let freqData = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(freqData);
             let barWidth = (canvas.width / (bufferLength / 2)) * 1.5;
             for (let i = 0; i < bufferLength / 2; i++) {
                 let barHeight = freqData[i] * amp;
-                if (colorSelect.value === 'rainbow') {
-                    ctx.fillStyle = `hsl(${(i / (bufferLength/2)) * 360}, 80%, 50%)`;
-                } else {
-                    ctx.fillStyle = accentColor;
-                }
+                if (colorSelect.value === 'rainbow') ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 80%, 50%)`;
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
             }
+        } else if (mode === 'circular') {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) * 0.4;
+            ctx.beginPath();
+            for (let i = 0; i < bufferLength; i++) {
+                let v = timeData[i] / 128.0;
+                let r = radius + ((v-1) * radius * amp);
+                let angle = (i / bufferLength) * Math.PI * 2;
+                let x = centerX + Math.cos(angle) * r;
+                let y = centerY + Math.sin(angle) * r;
+                if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            }
+            ctx.closePath();
+            ctx.stroke();
         }
     }
 }
-
 window.onresize = resize;
 resize();
 loadSettings();
