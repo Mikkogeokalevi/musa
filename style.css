@@ -1,0 +1,61 @@
+:root {
+    --bg-color: #050505;
+    --panel-bg: #111;
+    --text-color: #eee;
+    --accent-color: #0f0;
+}
+
+/* Päiväsaika-teema */
+[data-theme="light"] {
+    --bg-color: #f0f0f0;
+    --panel-bg: #ddd;
+    --text-color: #222;
+    --accent-color: #0055ff;
+}
+
+body {
+    margin: 0;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    overflow: hidden;
+    transition: background 0.3s, color 0.3s;
+}
+
+canvas {
+    display: block;
+    width: 100vw;
+    height: 55vh;
+    background: var(--bg-color);
+}
+
+.ui-panel {
+    padding: 15px;
+    background: var(--panel-bg);
+    height: 45vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.control-group { display: flex; flex-direction: column; gap: 5px; }
+label { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; }
+
+select, input {
+    padding: 10px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+}
+
+button {
+    grid-column: span 2;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-weight: bold;
+    border-radius: 8px;
+}
