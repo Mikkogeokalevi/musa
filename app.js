@@ -1,4 +1,4 @@
-/* Versio 1.7.0 */
+/* Versio 1.8.0 */
 let audioCtx, analyser, dataArray, bufferLength;
 const canvas = document.getElementById('scope');
 const ctx = canvas.getContext('2d');
@@ -12,6 +12,7 @@ const hzDisplay = document.getElementById('hzDisplay');
 const dbDisplay = document.getElementById('dbDisplay');
 
 let wakeLock = null;
+let isPaused = false; // Freeze-toimintoa varten
 
 window.showPage = function(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -24,11 +25,16 @@ function loadSettings() {
     const savedTheme = localStorage.getItem('scope_theme') || 'dark';
     const savedColor = localStorage.getItem('scope_color') || '#0f0';
     const savedMode = localStorage.getItem('scope_mode') || 'wave';
+    
     themeSelect.value = savedTheme;
     colorSelect.value = savedColor;
     visualMode.value = savedMode;
+    
     document.body.setAttribute('data-theme', savedTheme);
     document.documentElement.style.setProperty('--accent-color', savedColor);
+    
+    // KORJAUS: Varmistetaan että start-nappi on näkyvissä latauksen jälkeen
+    startBtn.style.display = 'block';
 }
 
 async function requestWakeLock() {
@@ -41,7 +47,13 @@ function resize() {
     canvas.height = window.innerHeight * 0.55;
 }
 
+// Klikkaus vaihtaa tilaa TAI jatkaa freeze-tilasta
 canvas.onclick = () => {
+    if (isPaused) {
+        isPaused = false;
+        draw();
+        return;
+    }
     const modes = ['wave', 'bars', 'spectrogram', 'circular'];
     let nextIdx = (modes.indexOf(visualMode.value) + 1) % modes.length;
     visualMode.value = modes[nextIdx];
@@ -63,31 +75,44 @@ function autoCorrelate(buf, sampleRate) {
     for (let i=0; i<L; i++) for (let j=0; j<L-i; j++) sum[i] += (buf2[j]/128-1)*(buf2[j+i]/128-1);
     let d=0; while (sum[d]>sum[d+1]) d++;
     let maxval = -1, maxpos = -1;
-    for (let i=d; i<L; i++) if (sum[i] > maxval) { maxval = sum[i]; maxpos = i; }
+    for (let i=d; i<L; i++) { if (sum[i] > maxval) { maxval = sum[i]; maxpos = i; } }
     return sampleRate / maxpos;
 }
 
 startBtn.onclick = async () => {
     try {
+        // KORJAUS: Luodaan AudioContext vasta klikkauksesta
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 2048;
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         source.connect(analyser);
+        
         startBtn.style.display = 'none';
         requestWakeLock();
+        isPaused = false;
         draw();
-    } catch (err) { alert("Virhe: " + err); }
+    } catch (err) { 
+        alert("Mikrofonin aktivointi epäonnistui. Tarkista luvat selaimen asetuksista."); 
+        console.error(err);
+    }
 };
 
 const tempCanvas = document.createElement('canvas');
 const tempCtx = tempCanvas.getContext('2d');
 
 function draw() {
-    if (!analyser) return;
+    if (!analyser || isPaused) return;
     requestAnimationFrame(draw);
     
     const theme = document.body.getAttribute('data-theme');
@@ -113,31 +138,21 @@ function draw() {
         tempCanvas.height = canvas.height;
         tempCtx.drawImage(canvas, 0, 0);
         ctx.drawImage(tempCanvas, 0, -1);
-        
         let barWidth = canvas.width / (bufferLength / 2);
         for (let i = 0; i < bufferLength / 2; i++) {
             let val = freqData[i] * amp;
-            
-            // TIUKKA NOISE GATE (Raja-arvo 70)
-            if (val < 70) {
-                ctx.fillStyle = bgColor;
-            } else {
-                // VÄRIN VOIMAKKUUS (Vähennetään vaaleutta, lisätään kylläisyyttä)
+            if (val < 70) { ctx.fillStyle = bgColor; }
+            else {
                 let lightness = (theme === 'light') ? "35%" : "50%";
-                if (colorSelect.value === 'rainbow') {
-                    ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})`;
-                } else {
-                    ctx.fillStyle = accentColor;
-                }
+                ctx.fillStyle = colorSelect.value === 'rainbow' ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
             }
             ctx.fillRect(i * barWidth, canvas.height - 1, barWidth + 1, 1);
         }
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 4; // Vielä vähän paksumpi viiva
+        ctx.lineWidth = 4;
         ctx.lineCap = 'round';
         ctx.strokeStyle = accentColor;
-        ctx.fillStyle = accentColor;
 
         if (mode === 'wave') {
             ctx.beginPath();
@@ -158,13 +173,8 @@ function draw() {
             let barWidth = (canvas.width / (bufferLength / 2)) * 1.5;
             for (let i = 0; i < bufferLength / 2; i++) {
                 let barHeight = freqData[i] * amp;
-                if (colorSelect.value === 'rainbow') {
-                    let lightness = (theme === 'light') ? "40%" : "50%";
-                    ctx.fillStyle = `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})`;
-                } else {
-                    ctx.fillStyle = accentColor;
-                }
-                // Piirretään palkit ilman varjoja tai läpinäkyvyyttä
+                let lightness = (theme === 'light') ? "40%" : "50%";
+                ctx.fillStyle = (colorSelect.value === 'rainbow') ? `hsl(${(i/(bufferLength/2))*360}, 100%, ${lightness})` : accentColor;
                 ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
             }
         } else if (mode === 'circular') {
@@ -190,22 +200,6 @@ function draw() {
         }
     }
 }
-
-themeSelect.onchange = (e) => {
-    const val = e.target.value;
-    document.body.setAttribute('data-theme', val);
-    localStorage.setItem('scope_theme', val);
-};
-
-colorSelect.onchange = (e) => {
-    const val = e.target.value;
-    document.documentElement.style.setProperty('--accent-color', val);
-    localStorage.setItem('scope_color', val);
-};
-
-visualMode.onchange = (e) => {
-    localStorage.setItem('scope_mode', e.target.value);
-};
 
 window.onresize = resize;
 resize();
