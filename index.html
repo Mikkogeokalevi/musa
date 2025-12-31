@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.5.1</title>
-    <link rel="stylesheet" href="style.css?v=1.5.1">
+    <title>Audio Scope Pro - v1.5.2</title>
+    <link rel="stylesheet" href="style.css?v=1.5.2">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -76,9 +76,17 @@
     <div id="history-page" class="page hidden">
         <div class="history-container">
             <h1>Kehityshistoria</h1>
+
+            <section class="history-item">
+                <div class="version-tag">v1.5.2 (Nykyinen)</div>
+                <ul>
+                    <li>Kriittinen korjaus: Korjattu yläpalkin navigointinappien toiminta palauttamalla showPage-funktio globaaliin window-kontekstiin.</li>
+                    <li>Varmistettu versionumeroiden täsmäävyys kaikissa tiedostoviittauksissa.</li>
+                </ul>
+            </section>
             
             <section class="history-item">
-                <div class="version-tag">v1.5.1 (Nykyinen)</div>
+                <div class="version-tag">v1.5.1</div>
                 <ul>
                     <li>Korjattu historia: Palautettu kaikki aiemmat kehitysvaiheet täysimittaisina käyttäjän ohjeen mukaisesti (ei tiivistämistä).</li>
                     <li>Pidetty v1.5.0 tekniset korjaukset ennallaan.</li>
@@ -167,6 +175,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.5.1"></script>
+    <script src="app.js?v=1.5.2"></script>
 </body>
 </html>
