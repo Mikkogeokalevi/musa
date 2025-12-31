@@ -3,23 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Scope Pro - v1.1.0</title>
-    <link rel="stylesheet" href="style.css?v=1.1.0">
+    <title>Audio Scope Pro - v1.2.0</title>
+    <link rel="stylesheet" href="style.css?v=1.2.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body data-theme="dark">
 
     <nav class="top-nav">
         <button onclick="showPage('scope-page')">SKOOPPI</button>
+        <button onclick="showPage('settings-page')">ASETUKSET</button>
         <button onclick="showPage('history-page')">HISTORIA</button>
     </nav>
 
     <div id="scope-page" class="page">
         <canvas id="scope"></canvas>
-        <div class="ui-panel">
+        <div class="info-overlay">Paina skooppia vaihtaaksesi tilaa</div>
+        <div class="ui-panel-minimal">
             <button id="startBtn">KÄYNNISTÄ MIKROFONI</button>
+        </div>
+    </div>
+
+    <div id="settings-page" class="page hidden">
+        <div class="settings-container">
+            <h1>Asetukset</h1>
             <div class="control-group">
-                <label>Teema</label>
+                <label>Teema (Yö/Päivä)</label>
                 <select id="themeSelect">
                     <option value="dark">Yö (Tumma)</option>
                     <option value="light">Päivä (Vaalea)</option>
@@ -37,15 +45,16 @@
                 </select>
             </div>
             <div class="control-group">
-                <label>Näkymä</label>
+                <label>Visualisointi</label>
                 <select id="visualMode">
-                    <option value="wave">Aalto</option>
-                    <option value="bars">Palkit</option>
+                    <option value="wave">Aalto (Oscilloscope)</option>
+                    <option value="bars">Palkit (FFT)</option>
+                    <option value="spectrogram">Vesiputous (Spectrogram)</option>
                 </select>
             </div>
             <div class="control-group">
                 <label>Herkkyys</label>
-                <input type="range" id="sensitivity" min="1" max="15" value="5">
+                <input type="range" id="sensitivity" min="1" max="25" value="5">
             </div>
         </div>
     </div>
@@ -55,46 +64,42 @@
             <h1>Kehityshistoria</h1>
             
             <section class="history-item">
-                <div class="version-tag">v1.1.0 (Nykyinen)</div>
+                <div class="version-tag">v1.2.0 (Nykyinen)</div>
                 <ul>
-                    <li>Lisätty LocalStorage-tuki: Sovellus muistaa nyt valitun teeman, värin ja näkymän käynnistyksen välillä.</li>
-                    <li>Laajennettu värivalikoimaa (lisätty Valkoinen ja Pinkki).</li>
-                    <li>Parannettu asetusten latausjärjestystä koodissa välkkymisen estämiseksi.</li>
-                    <li>Päivitetty HTML-meta-tagit parempaa PWA-käytettävyyttä varten.</li>
+                    <li>Lisätty Screen Wake Lock API: Estää näytön sammumisen sovelluksen ollessa aktiivinen.</li>
+                    <li>Uusi näkymä: Spectrogram (Vesiputous), joka näyttää taajuudet ajan funktiona.</li>
+                    <li>Interaktiivisuus: Skoopilla on nyt klikkaus-tunnistus, jolla voi vaihtaa näkymää nopeasti.</li>
+                    <li>Käyttöliittymäuudistus: Asetukset siirretty omalle sivulleen, jotta skooppi saa enemmän tilaa.</li>
+                    <li>Parannettu herkkyysskaalaa (1-25).</li>
+                </ul>
+            </section>
+
+            <section class="history-item">
+                <div class="version-tag">v1.1.0</div>
+                <ul>
+                    <li>Lisätty LocalStorage-tuki: Sovellus muistaa asetukset.</li>
+                    <li>Laajennettu värivalikoimaa.</li>
+                    <li>Päivitetty latausjärjestys välkkymisen estämiseksi.</li>
                 </ul>
             </section>
 
             <section class="history-item">
                 <div class="version-tag">v1.0.0</div>
                 <ul>
-                    <li>Projektin modulointi: Erotettu HTML, CSS ja JS omiin tiedostoihinsa.</li>
-                    <li>Lisätty navigointijärjestelmä (Skooppi / Historia).</li>
-                    <li>Lisätty teemajärjestelmä (Tumma/Vaalea) ja värivalinnat.</li>
-                    <li>Lisätty visuaalinen valinta: Oskillooskooppi (Aalto) ja Spektrianalyysi (Palkit).</li>
-                    <li>Lisätty herkkyyden säätö.</li>
-                    <li>Lisätty versionumerointi kaikkiin tiedostoihin.</li>
+                    <li>Projektin modulointi (HTML, CSS, JS).</li>
+                    <li>Navigointijärjestelmä ja perus-skooppi.</li>
                 </ul>
             </section>
 
             <section class="history-item">
-                <div class="version-tag">v0.2.0</div>
+                <div class="version-tag">v0.1.0 - v0.2.0</div>
                 <ul>
-                    <li>Ensimmäinen toimiva visualisointi Web Audio API:lla.</li>
-                    <li>Lisätty säätimet värille ja viivan paksuudelle.</li>
-                </ul>
-            </section>
-
-            <section class="history-item">
-                <div class="version-tag">v0.1.0</div>
-                <ul>
-                    <li>Konseptin luominen.</li>
-                    <li>PWA-valmius (manifest.json ja Service Worker).</li>
-                    <li>Mikrofonin käyttöoikeuksien hallinta.</li>
+                    <li>Konsepti, PWA-perusta ja ensimmäiset Web Audio -kokeilut.</li>
                 </ul>
             </section>
         </div>
     </div>
 
-    <script src="app.js?v=1.1.0"></script>
+    <script src="app.js?v=1.2.0"></script>
 </body>
 </html>
